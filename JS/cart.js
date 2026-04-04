@@ -92,7 +92,7 @@ const Cart = {
       `;
     });
     
-    const delivery = subtotal >= 15000 ? 0 : 350;
+    const delivery = subtotal >= 15000 ? 0 : 400;
     const total = subtotal + delivery;
     
     container.innerHTML = `

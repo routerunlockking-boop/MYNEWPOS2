@@ -55,7 +55,7 @@ const Checkout = {
       `;
     });
     
-    const delivery = subtotal >= 15000 ? 0 : 350;
+    const delivery = subtotal >= 15000 ? 0 : 400;
     const total = subtotal + delivery;
     
     const summaryEl = document.getElementById('checkoutSummary');
@@ -138,7 +138,7 @@ const Checkout = {
       return { productId: item.productId, qty: item.qty, price: item.price, name: product ? product.name : 'Unknown' };
     });
     
-    const delivery = subtotal >= 15000 ? 0 : 350;
+    const delivery = subtotal >= 15000 ? 0 : 400;
     const payment = document.querySelector('input[name="payment"]:checked').value;
     
     const orders = DB.getOrders();
