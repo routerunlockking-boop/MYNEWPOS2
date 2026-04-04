@@ -55,7 +55,7 @@ const Checkout = {
       `;
     });
     
-    const delivery = subtotal >= 15000 ? 0 : 400;
+    const delivery = 400;
     const total = subtotal + delivery;
     
     const summaryEl = document.getElementById('checkoutSummary');
@@ -64,7 +64,7 @@ const Checkout = {
         <h3>Order Summary</h3>
         ${itemsHTML}
         <div class="summary-row" style="margin-top:16px;"><span>Subtotal</span><span>${DB.formatLKR(subtotal)}</span></div>
-        <div class="summary-row"><span>Delivery</span><span>${delivery === 0 ? 'FREE' : DB.formatLKR(delivery)}</span></div>
+        <div class="summary-row"><span>Delivery</span><span>${DB.formatLKR(delivery)}</span></div>
         <div class="summary-row total"><span>Total</span><span>${DB.formatLKR(total)}</span></div>
       `;
     }
@@ -138,7 +138,7 @@ const Checkout = {
       return { productId: item.productId, qty: item.qty, price: item.price, name: product ? product.name : 'Unknown' };
     });
     
-    const delivery = subtotal >= 15000 ? 0 : 400;
+    const delivery = 400;
     const payment = document.querySelector('input[name="payment"]:checked').value;
     
     const orders = DB.getOrders();
