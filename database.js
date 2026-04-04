@@ -1,0 +1,132 @@
+const mongoose = require('mongoose');
+
+// Global variable to cache the mongoose connection
+let cachedDb = null;
+
+const connectDB = async () => {
+    if (cachedDb) {
+        console.log('Using cached MongoDB connection');
+        return cachedDb;
+    }
+
+    try {
+        const uri = process.env.MONGO_URI || 'mongodb+srv://Admin:Admin%4012345@cluster0.czllghf.mongodb.net/myDatabase?retryWrites=true&w=majority';
+        const db = await mongoose.connect(uri, {
+            serverSelectionTimeoutMS: 5000 // Tweak timeout down so Serverless fails faster instead of hanging
+        });
+
+        cachedDb = db;
+        console.log('Connected to MongoDB database');
+        return db;
+    } catch (err) {
+        console.error('Error connecting to MongoDB:', err.message);
+        throw err; // don't process.exit(1) in serverless!
+    }
+};
+
+// -- SCHEMAS --
+
+const UserSchema = new mongoose.Schema({
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    business_name: { type: String, required: true },
+    whatsapp_number: { type: String },
+    marketplace_enabled: { type: Boolean, default: false },
+    role: { type: String, default: 'user' },
+    is_active: { type: Boolean, default: false },
+    delete_request: { type: Boolean, default: false }
+});
+
+const ProductSchema = new mongoose.Schema({
+    user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    name: { type: String, required: true },
+    quantity: { type: Number, default: 0 },
+    barcode: { type: String, default: '' },
+    cost_price: { type: Number, default: 0.0 },
+    price: { type: Number, default: 0.0 },
+    image: { type: String }
+});
+
+const InvoiceItemSchema = new mongoose.Schema({
+    product_name: { type: String, required: true },
+    quantity: { type: Number, required: true },
+    cost_price: { type: Number, default: 0.0 },
+    price: { type: Number, required: true },
+    subtotal: { type: Number, required: true },
+    profit: { type: Number, default: 0.0 }
+});
+
+const InvoiceSchema = new mongoose.Schema({
+    user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    invoice_number: { type: String, required: true },
+    date: { type: String, required: true }, // Format: YYYY-MM-DD
+    time: { type: String, required: true }, // Format: HH:MM
+    customer_name: { type: String, default: '' },
+    customer_phone: { type: String, default: '' },
+    cashier_name: { type: String, default: 'System' },
+    payment_method: { type: String, default: 'Cash' },
+    subtotal_amount: { type: Number, default: 0.0 }, // Pre-discount total
+    voucher_code: { type: String, default: '' },
+    voucher_discount: { type: Number, default: 0.0 },
+    total_amount: { type: Number, default: 0.0 }, // Post-discount grand total
+    amount_paid: { type: Number, default: 0.0 },
+    total_profit: { type: Number, default: 0.0 },
+    items: [InvoiceItemSchema]
+});
+
+const CustomerSchema = new mongoose.Schema({
+    user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    name: { type: String, required: true },
+    phone: { type: String, required: true },
+    email: { type: String, default: '' },
+    address: { type: String, default: '' },
+    created_date: { type: String, default: () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Colombo', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()) }
+});
+
+// -- MODELS --
+const User = mongoose.model('User', UserSchema);
+const Product = mongoose.model('Product', ProductSchema);
+const Invoice = mongoose.model('Invoice', InvoiceSchema);
+const Customer = mongoose.model('Customer', CustomerSchema);
+
+// Create default admin user
+const initializeDatabase = async () => {
+    try {
+        const adminExists = await User.findOne({ role: 'admin' });
+        if (!adminExists) {
+            await User.create({
+                email: 'smartzonelk101@gmail.com',
+                password: '200723800385@',
+                business_name: 'SMART ZONE',
+                role: 'admin',
+                is_active: true
+            });
+            console.log('Admin user created.');
+        } else {
+            await User.updateOne(
+                { _id: adminExists._id },
+                {
+                    email: 'smartzonelk101@gmail.com',
+                    password: '200723800385@',
+                    business_name: 'SMART ZONE',
+                    role: 'admin',
+                    is_active: true
+                }
+            );
+            // Also clean up the old 'Admin' text if it exists but wasn't caught by the role query
+            // just to be thorough, but we updated by ID anyway
+            console.log('Admin credentials updated for existing admin user.');
+        }
+    } catch (err) {
+        console.error('Error initializing default user:', err.message);
+    }
+};
+
+module.exports = {
+    connectDB,
+    initializeDatabase,
+    User,
+    Product,
+    Invoice,
+    Customer
+};
