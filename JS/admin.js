@@ -163,6 +163,7 @@ const Admin = {
               <option value="confirmed" ${o.status==='confirmed'?'selected':''}>Confirmed</option>
               <option value="processing" ${o.status==='processing'?'selected':''}>Processing</option>
               <option value="shipped" ${o.status==='shipped'?'selected':''}>Shipped</option>
+              <option value="arrived" ${o.status==='arrived'?'selected':''}>Arrived</option>
               <option value="delivered" ${o.status==='delivered'?'selected':''}>Delivered</option>
               <option value="cancelled" ${o.status==='cancelled'?'selected':''}>Cancelled</option>
             </select>
@@ -266,7 +267,53 @@ const Admin = {
       order.status = status;
       DB.setOrders(orders);
       DB.showToast('Order Updated', `${orderId} status changed to ${status}`, 'success');
+      
+      // Send email notification when order arrives
+      if (status === 'arrived') {
+        this.sendArrivalEmail(order);
+      }
     }
+  },
+
+  // Send arrival email notification
+  sendArrivalEmail(order) {
+    // Create email content
+    const emailSubject = `Your Order ${order.id} Has Arrived! - Smart Zone LK`;
+    const emailBody = `
+Dear ${order.customer},
+
+Great news! Your order has arrived and is ready for delivery.
+
+Order Details:
+- Order ID: ${order.id}
+- Total Amount: ${DB.formatLKR(order.total)}
+- Delivery Address: ${order.address}, ${order.city}, ${order.district}
+- Contact: ${order.phone}
+
+Items Ordered:
+${order.items.map(item => `- ${item.name} x${item.qty} = ${DB.formatLKR(item.price * item.qty)}`).join('\n')}
+
+Delivery Information:
+- Delivery will be made within 1-2 business days
+- Our delivery team will contact you before arrival
+- Please have the payment ready if you selected Cash on Delivery
+
+Thank you for shopping with Smart Zone LK!
+
+Best regards,
+Smart Zone LK Team
+📞 +94 78 68000 86
+📧 smartzonelk101@gmail.com
+🌐 www.smartzonelk.com
+    `;
+
+    // Create mailto link
+    const mailtoLink = `mailto:${order.email}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+    
+    // Open email client
+    window.open(mailtoLink);
+    
+    DB.showToast('Email Sent', `Arrival notification email opened for ${order.customer}`, 'success');
   },
 
   // View order detail
