@@ -8,7 +8,6 @@ const Checkout = {
     this.setupPaymentMethods();
     this.setupPlaceOrder();
     this.setupContinueShopping();
-    this.setupPaymentSlipUpload();
   },
 
   // Enforces login before checkout and pre-fills user details
@@ -56,7 +55,7 @@ const Checkout = {
       `;
     });
     
-    const delivery = 400;
+    const delivery = subtotal >= 15000 ? 0 : 350;
     const total = subtotal + delivery;
     
     const summaryEl = document.getElementById('checkoutSummary');
@@ -65,7 +64,7 @@ const Checkout = {
         <h3>Order Summary</h3>
         ${itemsHTML}
         <div class="summary-row" style="margin-top:16px;"><span>Subtotal</span><span>${DB.formatLKR(subtotal)}</span></div>
-        <div class="summary-row"><span>Delivery</span><span>${DB.formatLKR(delivery)}</span></div>
+        <div class="summary-row"><span>Delivery</span><span>${delivery === 0 ? 'FREE' : DB.formatLKR(delivery)}</span></div>
         <div class="summary-row total"><span>Total</span><span>${DB.formatLKR(total)}</span></div>
       `;
     }
@@ -109,33 +108,6 @@ const Checkout = {
     }
   },
 
-  // Setup payment slip upload
-  setupPaymentSlipUpload() {
-    const fileInput = document.getElementById('paymentSlip');
-    if (fileInput) {
-      fileInput.addEventListener('change', (e) => this.handlePaymentSlip(e));
-    }
-  },
-
-  // Handle payment slip upload
-  handlePaymentSlip(e) {
-    const file = e.target.files[0];
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const preview = document.getElementById('slipPreview');
-        const previewImg = document.getElementById('slipPreviewImg');
-        if (preview && previewImg) {
-          previewImg.src = e.target.result;
-          preview.style.display = 'block';
-        }
-        // Store slip data
-        this.paymentSlipData = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-  },
-
   // Place order
   placeOrder() {
     const name = document.getElementById('checkName').value.trim();
@@ -144,13 +116,6 @@ const Checkout = {
     const address = document.getElementById('checkAddress').value.trim();
     const district = document.getElementById('checkDistrict').value;
     const city = document.getElementById('checkCity').value.trim();
-    const payment = document.querySelector('input[name="payment"]:checked').value;
-    
-    // Validate bank transfer slip
-    if (payment === 'bank' && !this.paymentSlipData) {
-      DB.showToast('Payment Slip Required', 'Please upload your bank transfer slip.', 'error');
-      return;
-    }
     
     // Validation
     if (!name || !phone || !email || !address || !district || !city) {
@@ -173,7 +138,9 @@ const Checkout = {
       return { productId: item.productId, qty: item.qty, price: item.price, name: product ? product.name : 'Unknown' };
     });
     
-    const delivery = 400;
+    const delivery = subtotal >= 15000 ? 0 : 350;
+    const payment = document.querySelector('input[name="payment"]:checked').value;
+    
     const orders = DB.getOrders();
     const orderId = 'SZ-' + String(orders.length + 6).padStart(3, '0');
     
@@ -189,8 +156,7 @@ const Checkout = {
       district: district,
       city: city,
       date: new Date().toISOString().split('T')[0],
-      address: address,
-      paymentSlip: this.paymentSlipData || null
+      address: address
     };
     
     orders.push(order);
@@ -221,13 +187,6 @@ const Checkout = {
     document.getElementById('checkCity').value = '';
     document.getElementById('checkPostal').value = '';
     document.getElementById('checkNotes').value = '';
-    
-    // Clear payment slip
-    this.paymentSlipData = null;
-    const fileInput = document.getElementById('paymentSlip');
-    if (fileInput) fileInput.value = '';
-    const preview = document.getElementById('slipPreview');
-    if (preview) preview.style.display = 'none';
   }
 };
 
