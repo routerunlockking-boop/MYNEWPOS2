@@ -5,7 +5,7 @@
 
 const Auth = {
   init() {
-    this.setupAccountButton();
+    this.updateAuthUI();
     this.setupModalClose();
     this.setupLoginSubmit();
     this.setupRegisterSubmit();
@@ -15,9 +15,35 @@ const Auth = {
 
   // Setup account button
   setupAccountButton() {
-    const btn = document.getElementById('accountBtn');
-    if (btn) {
-      btn.addEventListener('click', () => this.openModal('login'));
+    // Legacy mapping (now handled in updateAuthUI)
+  },
+
+  // Update UI based on authentication status
+  updateAuthUI() {
+    const userStr = localStorage.getItem('sz_user');
+    const user = userStr ? JSON.parse(userStr) : null;
+    const accountBtn = document.getElementById('accountBtn');
+    
+    if (!accountBtn) return;
+    
+    // Remove old listeners
+    const newBtn = accountBtn.cloneNode(true);
+    accountBtn.parentNode.replaceChild(newBtn, accountBtn);
+    
+    if (user) {
+        newBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
+        newBtn.title = 'Logout (' + user.name + ')';
+        newBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to log out?')) {
+                localStorage.removeItem('sz_user');
+                DB.showToast('Logged Out', 'You have been logged out successfully.', 'info');
+                this.updateAuthUI();
+            }
+        });
+    } else {
+        newBtn.innerHTML = '<i class="fas fa-user"></i>';
+        newBtn.title = 'Account';
+        newBtn.addEventListener('click', () => this.openModal('login'));
     }
   },
 
@@ -51,7 +77,7 @@ const Auth = {
       document.getElementById('loginForm').style.display = 'block';
       document.getElementById('registerForm').style.display = 'none';
       document.getElementById('authTitle').textContent = 'Sign In';
-      document.getElementById('authSwitch').innerHTML = 'Don\'t have an account? <a href="#" id="showRegisterLink">Sign Up</a>';
+      document.getElementById('authSwitch').innerHTML = 'Don\\'t have an account? <a href="#" id="showRegisterLink">Sign Up</a>';
     } else {
       document.getElementById('loginForm').style.display = 'none';
       document.getElementById('registerForm').style.display = 'block';
@@ -91,8 +117,28 @@ const Auth = {
           DB.showToast('Error', 'Please fill in all fields.', 'error');
           return;
         }
-        DB.showToast('Welcome Back!', 'You have signed in successfully.', 'success');
-        this.closeModal();
+        
+        // Demo admin login bypassing db check
+        if(email === 'admin@smartzonelk.com' && password === 'admin123') {
+            const adminUser = { name: 'Admin User', email: 'admin@smartzonelk.com', phone: '', role: 'admin' };
+            localStorage.setItem('sz_user', JSON.stringify(adminUser));
+            DB.showToast('Admin Login', 'Welcome back, Admin!', 'success');
+            this.updateAuthUI();
+            this.closeModal();
+            Navigation.navigateTo('admin');
+            return;
+        }
+
+        const customers = DB.getCustomers();
+        const customer = customers.find(c => c.email === email);
+        if (customer) {
+            localStorage.setItem('sz_user', JSON.stringify(customer));
+            DB.showToast('Welcome Back!', 'You have signed in successfully.', 'success');
+            this.updateAuthUI();
+            this.closeModal();
+        } else {
+            DB.showToast('Error', 'Invalid email or password.', 'error');
+        }
       });
     }
   },
@@ -110,7 +156,20 @@ const Auth = {
           DB.showToast('Error', 'Please fill in all fields.', 'error');
           return;
         }
+
+        const customers = DB.getCustomers();
+        if (customers.find(c => c.email === email)) {
+            DB.showToast('Error', 'Email already exists.', 'error');
+            return;
+        }
+
+        const newCustomer = { name, email, phone, orders: 0, totalSpent: 0, registered: new Date().toISOString().split('T')[0] };
+        customers.push(newCustomer);
+        localStorage.setItem('sz_customers', JSON.stringify(customers));
+        localStorage.setItem('sz_user', JSON.stringify(newCustomer));
+
         DB.showToast('Account Created!', 'Welcome to Smart Zone LK!', 'success');
+        this.updateAuthUI();
         this.closeModal();
       });
     }
@@ -127,4 +186,4 @@ const Auth = {
 };
 
 // Initialize
-document.addEventListener('DOMContentLoaded', () => Auth.init());
+document.addEventListener('DOMContentLoaded', () => Auth.init());
