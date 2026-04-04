@@ -57,6 +57,9 @@ const Navigation = {
       case 'checkout':
         Checkout.renderCheckoutSummary();
         break;
+      case 'orders':
+        if (typeof Orders !== 'undefined') Orders.renderCustomerOrders();
+        break;
       case 'admin':
         Admin.renderDashboard();
         break;
