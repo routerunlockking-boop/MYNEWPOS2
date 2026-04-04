@@ -57,7 +57,7 @@
             <a href="#" class="nav-link" data-filter="Mesh Systems"><i class="fas fa-network-wired"></i> Mesh Systems</a>
             <a href="#" class="nav-link" data-nav="about"><i class="fas fa-info-circle"></i> About</a>
             <a href="#" class="nav-link" data-nav="contact"><i class="fas fa-envelope"></i> Contact</a>
-            <a href="#" class="nav-link" data-nav="admin-login" style="margin-left:auto;color:var(--gray-400)"><i class="fas fa-lock"></i> Admin</a>
+            <a href="#" class="nav-link" data-nav="login" style="margin-left:auto;color:var(--gray-400)"><i class="fas fa-lock"></i> Login Portal</a>
         </div>
     </nav>
 
@@ -83,7 +83,7 @@
             <a href="#" data-nav="cart"><i class="fas fa-shopping-cart"></i> Cart</a>
             <a href="#" data-nav="about"><i class="fas fa-info-circle"></i> About Us</a>
             <a href="#" data-nav="contact"><i class="fas fa-envelope"></i> Contact</a>
-            <a href="#" data-nav="admin-login"><i class="fas fa-lock"></i> Admin Panel</a>
+            <a href="#" data-nav="login"><i class="fas fa-lock"></i> Login Portal</a>
         </div>
     </div>
 
@@ -429,19 +429,27 @@
         </div>
     </div>
 
-    <!-- ADMIN LOGIN PAGE -->
-    <div class="page" id="page-admin-login">
+    <!-- LOGIN/REGISTER PORTAL -->
+    <div class="page" id="page-login">
         <div class="admin-login-page">
-            <div class="admin-login-card">
-                <div class="logo-icon" style="background:linear-gradient(135deg,var(--primary),var(--accent));margin:0 auto 20px;"><i class="fas fa-wifi"></i></div>
-                <h2>Admin Dashboard</h2>
-                <p>Sign in to manage your store</p>
-                <div class="form-group"><label>Email Address</label><input type="email" id="adminEmail" placeholder="admin@smartzonelk.com" value="admin@smartzonelk.com"></div>
-                <div class="form-group"><label>Password</label><input type="password" id="adminPassword" placeholder="Enter password" value="admin123"></div>
-                <div class="form-group" style="display:flex;align-items:center;gap:8px;"><input type="checkbox" id="adminRemember" style="accent-color:var(--primary);"><label for="adminRemember" style="font-size:0.85rem;color:var(--gray-600);">Remember me</label></div>
-                <button class="btn btn-primary btn-lg" id="adminLoginBtn" style="width:100%;justify-content:center;"><i class="fas fa-sign-in-alt"></i> Sign In</button>
-                <p style="text-align:center;margin-top:16px;font-size:0.85rem;color:var(--gray-400);">Demo: admin@smartzonelk.com / admin123</p>
-                <div style="text-align:center;margin-top:20px;"><a href="#" data-nav="home" style="color:var(--primary);text-decoration:none;font-size:0.85rem;"><i class="fas fa-arrow-left"></i> Back to Store</a></div>
+            <div class="admin-login-card" id="portalLoginCard">
+                <div class="logo-icon" style="background:linear-gradient(135deg,var(--primary),var(--accent));margin:0 auto 20px;"><i class="fas fa-user-circle"></i></div>
+                <h2 id="portalTitle">Sign In</h2>
+                <p id="portalSubtitle">Access your account or admin dashboard</p>
+                <div class="form-group"><label>Email Address</label><input type="email" id="portalEmail" placeholder="your@email.com"></div>
+                <div class="form-group"><label>Password</label><input type="password" id="portalPassword" placeholder="Enter password"></div>
+                
+                <!-- Registration Specific Fields (Hidden by default) -->
+                <div id="portalRegFields" style="display:none;">
+                    <div class="form-group"><label>Full Name</label><input type="text" id="portalName" placeholder="Your full name"></div>
+                    <div class="form-group"><label>Phone</label><input type="tel" id="portalPhone" placeholder="+94 7X XXX XXXX"></div>
+                </div>
+
+                <div class="form-group" style="display:flex;align-items:center;gap:8px;" id="portalRememberDiv"><input type="checkbox" id="portalRemember" style="accent-color:var(--primary);"><label for="portalRemember" style="font-size:0.85rem;color:var(--gray-600);">Remember me</label></div>
+                
+                <button class="btn btn-primary btn-lg" id="portalSubmitBtn" style="width:100%;justify-content:center;"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+                <p style="text-align:center;margin-top:16px;font-size:0.85rem;color:var(--gray-600);" id="portalSwitchText">Don't have an account? <a href="#" id="portalSwitchLink" style="color:var(--primary);font-weight:600;">Sign Up</a></p>
+                <div style="text-align:center;margin-top:20px;"><a href="#" onclick="navigateTo('home')" style="color:var(--gray-500);text-decoration:none;font-size:0.85rem;"><i class="fas fa-arrow-left"></i> Back to Store</a></div>
             </div>
         </div>
     </div>
@@ -546,34 +554,7 @@
         </div>
     </div>
 
-    <!-- AUTH MODAL -->
-    <div class="modal-overlay" id="authModal">
-        <div class="modal">
-            <div class="modal-header"><h2 id="authTitle">Sign In</h2><button class="modal-close" id="authCloseBtn"><i class="fas fa-times"></i></button></div>
-            <div class="modal-body" id="authBody">
-                <div id="loginForm">
-                    <div class="form-group"><label>Email Address</label><input type="email" id="loginEmail" placeholder="your@email.com"></div>
-                    <div class="form-group"><label>Password</label><input type="password" id="loginPassword" placeholder="Enter your password"></div>
-                    <button class="btn btn-primary" id="loginSubmitBtn"><i class="fas fa-sign-in-alt"></i> Sign In</button>
-                    <div class="modal-divider">or continue with</div>
-                    <div class="social-login">
-                        <button class="social-btn" id="googleLoginBtn"><i class="fab fa-google" style="color:#DB4437;"></i> Google</button>
-                        <button class="social-btn" id="phoneLoginBtn"><i class="fas fa-phone" style="color:var(--secondary);"></i> Phone</button>
-                    </div>
-                </div>
-                <div id="registerForm" style="display:none;">
-                    <div class="form-group"><label>Full Name</label><input type="text" id="regName" placeholder="Your full name"></div>
-                    <div class="form-group"><label>Email Address</label><input type="email" id="regEmail" placeholder="your@email.com"></div>
-                    <div class="form-group"><label>Phone Number</label><input type="tel" id="regPhone" placeholder="+94 7X XXX XXXX"></div>
-                    <div class="form-group"><label>Password</label><input type="password" id="regPassword" placeholder="Create a password"></div>
-                    <button class="btn btn-primary" id="registerSubmitBtn"><i class="fas fa-user-plus"></i> Create Account</button>
-                </div>
-            </div>
-            <div class="modal-footer" id="authFooter">
-                <span id="authSwitch">Don't have an account? <a href="#" id="showRegisterLink">Sign Up</a></span>
-            </div>
-        </div>
-    </div>
+    <!-- Deleted Auth Modal -->
 
     <!-- ORDER CONFIRMATION MODAL -->
     <div class="modal-overlay" id="orderConfirmModal">
@@ -614,13 +595,13 @@
     </footer>
 
     <!-- JavaScript Files -->
-    <script src="js/database.js"></script>
-    <script src="js/navigation.js"></script>
-    <script src="js/products.js"></script>
-    <script src="js/cart.js"></script>
-    <script src="js/checkout.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/admin.js"></script>
-    <script src="js/main.js"></script>
+    <script src="JS/database.js"></script>
+    <script src="JS/navigation.js"></script>
+    <script src="JS/products.js"></script>
+    <script src="JS/cart.js"></script>
+    <script src="JS/checkout.js"></script>
+    <script src="JS/auth.js"></script>
+    <script src="JS/admin.js"></script>
+    <script src="JS/main.js"></script>
 </body>
 </html>
