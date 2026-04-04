@@ -323,10 +323,10 @@
                         </div>
                         <div id="bankDetails" style="display:none;background:var(--gray-50);padding:16px;border-radius:10px;margin-bottom:16px;">
                             <p style="font-size:0.85rem;color:var(--gray-600);margin-bottom:8px;"><strong>Bank Transfer Details:</strong></p>
-                            <p style="font-size:0.85rem;color:var(--gray-600);">Bank: Commercial Bank of Ceylon</p>
-                            <p style="font-size:0.85rem;color:var(--gray-600);">Account: Smart Zone LK (Pvt) Ltd</p>
-                            <p style="font-size:0.85rem;color:var(--gray-600);">Account No: 8001234567</p>
-                            <p style="font-size:0.85rem;color:var(--gray-600);">Branch: Colombo 07</p>
+                            <p style="font-size:0.85rem;color:var(--gray-600);">Bank: Bank of Ceylon</p>
+                            <p style="font-size:0.85rem;color:var(--gray-600);">Account Name: I P M D WIJEGUNAWARSHANA</p>
+                            <p style="font-size:0.85rem;color:var(--gray-600);">Account No: 95251938</p>
+                            <p style="font-size:0.85rem;color:var(--gray-600);">Branch: Padaviya</p>
                         </div>
                     </div>
                     <button class="btn btn-primary btn-lg" id="placeOrderBtn" style="width:100%;justify-content:center;margin-top:24px;"><i class="fas fa-lock"></i> Place Order</button>
@@ -525,6 +525,22 @@
                     <div class="admin-header"><h1 id="productFormTitle">Add New Product</h1><button class="btn btn-ghost" data-admin="products"><i class="fas fa-arrow-left"></i> Back to Products</button></div>
                     <div class="admin-card">
                         <div class="admin-form-grid">
+                            <div class="full">
+                                <label>Product Image</label>
+                                <div style="display:flex;gap:12px;align-items:flex-end;">
+                                    <div style="flex:1;">
+                                        <input type="file" id="prodImageFile" accept="image/*" style="display:none;">
+                                        <input type="text" id="prodImageUrl" placeholder="https://example.com/image.jpg" style="width:100%;">
+                                        <div style="margin-top:8px;">
+                                            <button type="button" class="btn btn-sm btn-outline" onclick="Admin.selectImage()"><i class="fas fa-upload"></i> Upload Image</button>
+                                            <span style="margin-left:8px;font-size:0.8rem;color:var(--gray-500);">or enter URL</span>
+                                        </div>
+                                    </div>
+                                    <div id="imagePreviewContainer" style="display:none;">
+                                        <img id="imagePreview" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--gray-300);">
+                                    </div>
+                                </div>
+                            </div>
                             <div><label>Product Name *</label><input type="text" id="prodName" placeholder="e.g. TP-Link Archer AX73"></div>
                             <div><label>Brand *</label><select id="prodBrand"><option value="">Select Brand</option><option>TP-Link</option><option>ASUS</option><option>Huawei</option><option>Xiaomi</option><option>Netgear</option><option>Mercusys</option><option>Tenda</option><option>D-Link</option><option>Other</option></select></div>
                             <div><label>Category *</label><select id="prodCategory"><option value="">Select Category</option><option>Home Routers</option><option>Gaming Routers</option><option>Mesh Systems</option><option>Enterprise</option><option>Accessories</option></select></div>
@@ -547,8 +563,11 @@
                 </div>
                 <!-- Customers -->
                 <div class="admin-section" id="admin-customers" style="display:none;">
-                    <div class="admin-header"><h1>Customers</h1></div>
-                    <div class="admin-card"><table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Orders</th><th>Total Spent</th><th>Registered</th></tr></thead><tbody id="adminCustomersBody"></tbody></table></div>
+                    <div class="admin-header">
+                        <h1>Customers</h1>
+                        <button class="btn btn-primary" onclick="Admin.showAddCustomerModal()"><i class="fas fa-plus"></i> Add Customer</button>
+                    </div>
+                    <div class="admin-card"><table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Orders</th><th>Total Spent</th><th>Registered</th><th>Actions</th></tr></thead><tbody id="adminCustomersBody"></tbody></table></div>
                 </div>
                 <!-- Analytics -->
                 <div class="admin-section" id="admin-analytics" style="display:none;">
@@ -571,6 +590,31 @@
     </div>
 
     <!-- Deleted Auth Modal -->
+
+    <!-- ADD CUSTOMER MODAL -->
+    <div class="modal-overlay" id="addCustomerModal">
+        <div class="modal">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                <h2 style="font-size:1.5rem;font-weight:800;color:var(--dark);">Add Customer</h2>
+                <button class="btn btn-ghost" onclick="Admin.hideAddCustomerModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="addCustomerForm" onsubmit="Admin.saveNewCustomer(event)">
+                <div style="margin-bottom:15px;">
+                    <label style="display:block;margin-bottom:5px;font-size:0.9rem;font-weight:600;">Full Name *</label>
+                    <input type="text" id="newCustomerName" required style="width:100%;padding:10px;border:1px solid var(--gray-300);border-radius:6px;">
+                </div>
+                <div style="margin-bottom:15px;">
+                    <label style="display:block;margin-bottom:5px;font-size:0.9rem;font-weight:600;">Email Address *</label>
+                    <input type="email" id="newCustomerEmail" required style="width:100%;padding:10px;border:1px solid var(--gray-300);border-radius:6px;">
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label style="display:block;margin-bottom:5px;font-size:0.9rem;font-weight:600;">Phone Number *</label>
+                    <input type="text" id="newCustomerPhone" required placeholder="e.g. +94 77 123 4567" style="width:100%;padding:10px;border:1px solid var(--gray-300);border-radius:6px;">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Save Customer</button>
+            </form>
+        </div>
+    </div>
 
     <!-- ORDER CONFIRMATION MODAL -->
     <div class="modal-overlay" id="orderConfirmModal">

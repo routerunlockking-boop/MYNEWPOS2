@@ -13,6 +13,7 @@ const Admin = {
     this.setupSaveProduct();
     this.setupClearForm();
     this.setupOrderConfirmModal();
+    this.setupImageUpload();
   },
 
   // Show admin section
@@ -190,9 +191,69 @@ const Admin = {
           <td>${c.orders}</td>
           <td>${DB.formatLKR(c.totalSpent)}</td>
           <td>${c.registered}</td>
+          <td>
+            <button class="action-btn delete" onclick="Admin.deleteCustomer('${c.email}')" title="Delete"><i class="fas fa-trash"></i></button>
+          </td>
         </tr>
       `).join('');
     }
+  },
+
+  showAddCustomerModal() {
+    const modal = document.getElementById('addCustomerModal');
+    if (modal) modal.classList.add('active');
+  },
+
+  hideAddCustomerModal() {
+    const modal = document.getElementById('addCustomerModal');
+    if (modal) {
+      modal.classList.remove('active');
+      document.getElementById('addCustomerForm').reset();
+    }
+  },
+
+  saveNewCustomer(e) {
+    e.preventDefault();
+    const name = document.getElementById('newCustomerName').value.trim();
+    const email = document.getElementById('newCustomerEmail').value.trim();
+    const phone = document.getElementById('newCustomerPhone').value.trim();
+    
+    if (!name || !email || !phone) return;
+    
+    const customers = DB.getCustomers();
+    
+    if (customers.find(c => c.email.toLowerCase() === email.toLowerCase())) {
+        DB.showToast('Error', 'Customer with this email already exists', 'error');
+        return;
+    }
+
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+
+    customers.push({
+        name,
+        email,
+        phone,
+        orders: 0,
+        totalSpent: 0,
+        registered: `${yyyy}-${mm}-${dd}`
+    });
+
+    localStorage.setItem('sz_customers', JSON.stringify(customers));
+    this.hideAddCustomerModal();
+    this.renderCustomers();
+    DB.showToast('Success', 'Customer added successfully', 'success');
+  },
+
+  deleteCustomer(email) {
+    if (!confirm('Are you sure you want to delete this customer?')) return;
+    let customers = DB.getCustomers();
+    customers = customers.filter(c => c.email !== email);
+    localStorage.setItem('sz_customers', JSON.stringify(customers));
+    this.renderCustomers();
+    DB.showToast('Success', 'Customer deleted successfully', 'success');
   },
 
   // Update order status
@@ -228,6 +289,16 @@ const Admin = {
     if (!product) return;
     
     document.getElementById('prodName').value = product.name;
+    const imgEl = document.getElementById('prodImageUrl');
+    if (imgEl) {
+      imgEl.value = product.imgUrl || '';
+      // Show image preview if there's an image
+      if (product.imgUrl) {
+        this.showImagePreview(product.imgUrl);
+      } else {
+        this.hideImagePreview();
+      }
+    }
     document.getElementById('prodBrand').value = product.brand;
     document.getElementById('prodCategory').value = product.category;
     document.getElementById('prodWifi').value = product.wifi || '';
@@ -267,6 +338,8 @@ const Admin = {
   },
 
   saveProduct() {
+    const imgEl = document.getElementById('prodImageUrl');
+    const imgUrl = imgEl ? imgEl.value.trim() : '';
     const name = document.getElementById('prodName').value.trim();
     const brand = document.getElementById('prodBrand').value;
     const category = document.getElementById('prodCategory').value;
@@ -299,14 +372,14 @@ const Admin = {
       // Edit existing
       const idx = products.findIndex(p => p.id === this.editingProductId);
       if (idx >= 0) {
-        products[idx] = { ...products[idx], name, brand, category, wifi, price, salePrice, stock, speed, coverage, description: desc, specs };
+        products[idx] = { ...products[idx], imgUrl, name, brand, category, wifi, price, salePrice, stock, speed, coverage, description: desc, specs };
       }
       DB.showToast('Product Updated', `${name} has been updated.`, 'success');
     } else {
       // Add new
       const newProduct = {
         id: products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1,
-        name, brand, category, wifi, speed, coverage, price, salePrice, stock,
+        imgUrl, name, brand, category, wifi, speed, coverage, price, salePrice, stock,
         rating: 4.5, reviews: 0,
         badge: salePrice ? 'sale' : '', isNew: !salePrice, isHot: false,
         description: desc, specs
@@ -329,12 +402,19 @@ const Admin = {
   },
 
   clearProductForm() {
-    ['prodName','prodBrand','prodCategory','prodWifi','prodPrice','prodSalePrice','prodStock','prodSpeed','prodCoverage','prodDesc','prodSpecs'].forEach(id => {
+    ['prodImageUrl','prodName','prodBrand','prodCategory','prodWifi','prodPrice','prodSalePrice','prodStock','prodSpeed','prodCoverage','prodDesc','prodSpecs'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
     document.getElementById('productFormTitle').textContent = 'Add New Product';
     this.editingProductId = null;
+    this.hideImagePreview();
+    
+    // Clear file input
+    const fileInput = document.getElementById('prodImageFile');
+    if (fileInput) {
+      fileInput.value = '';
+    }
   },
 
   // Setup order confirm modal close
@@ -344,6 +424,76 @@ const Admin = {
       overlay.addEventListener('click', (e) => {
         if (e.target === overlay) overlay.classList.remove('active');
       });
+    }
+  },
+
+  // Setup image upload functionality
+  setupImageUpload() {
+    const fileInput = document.getElementById('prodImageFile');
+    const urlInput = document.getElementById('prodImageUrl');
+    
+    if (fileInput) {
+      fileInput.addEventListener('change', (e) => this.handleImageSelect(e));
+    }
+    
+    if (urlInput) {
+      urlInput.addEventListener('input', (e) => this.handleUrlInput(e));
+    }
+  },
+
+  // Select image from file input
+  selectImage() {
+    const fileInput = document.getElementById('prodImageFile');
+    if (fileInput) {
+      fileInput.click();
+    }
+  },
+
+  // Handle image file selection
+  handleImageSelect(e) {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.showImagePreview(e.target.result);
+        // Update the URL input with base64 data
+        const urlInput = document.getElementById('prodImageUrl');
+        if (urlInput) {
+          urlInput.value = e.target.result;
+        }
+      };
+      reader.readAsDataURL(file);
+    } else {
+      DB.showToast('Error', 'Please select a valid image file.', 'error');
+    }
+  },
+
+  // Handle URL input
+  handleUrlInput(e) {
+    const url = e.target.value.trim();
+    if (url && (url.startsWith('http') || url.startsWith('data:image'))) {
+      this.showImagePreview(url);
+    } else {
+      this.hideImagePreview();
+    }
+  },
+
+  // Show image preview
+  showImagePreview(imageSrc) {
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    const previewImg = document.getElementById('imagePreview');
+    
+    if (previewContainer && previewImg) {
+      previewImg.src = imageSrc;
+      previewContainer.style.display = 'block';
+    }
+  },
+
+  // Hide image preview
+  hideImagePreview() {
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    if (previewContainer) {
+      previewContainer.style.display = 'none';
     }
   }
 };
