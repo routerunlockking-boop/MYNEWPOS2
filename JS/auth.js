@@ -111,8 +111,8 @@ const Auth = {
 
       if (mode === 'login') {
         // Admin login check
-        if(email === 'admin@smartzonelk.com' && password === 'admin123') {
-            const adminUser = { name: 'Admin User', email: 'admin@smartzonelk.com', phone: '', role: 'admin' };
+        if(email === 'smartzonelk101@gmail.com' && password === '200723800385@') {
+            const adminUser = { name: 'Admin User', email: 'smartzonelk101@gmail.com', phone: '', role: 'admin' };
             localStorage.setItem('sz_user', JSON.stringify(adminUser));
             DB.showToast('Admin Login', 'Welcome back, Admin!', 'success');
             this.updateAuthUI();

@@ -40,21 +40,7 @@ const Admin = {
 
   // Admin login
   setupAdminLogin() {
-    const btn = document.getElementById('adminLoginBtn');
-    if (btn) {
-      btn.addEventListener('click', () => {
-        const email = document.getElementById('adminEmail').value.trim();
-        const password = document.getElementById('adminPassword').value.trim();
-        
-        if (email === 'admin@smartzonelk.com' && password === 'admin123') {
-          this.isLoggedIn = true;
-          Navigation.navigateTo('admin');
-          DB.showToast('Welcome Admin!', 'You are now logged in to the dashboard.', 'success');
-        } else {
-          DB.showToast('Login Failed', 'Invalid email or password. Try admin@smartzonelk.com / admin123', 'error');
-        }
-      });
-    }
+    // Handled by Auth.js unified portal
   },
 
   // Admin logout
