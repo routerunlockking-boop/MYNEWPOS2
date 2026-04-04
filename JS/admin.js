@@ -64,7 +64,7 @@ const Admin = {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         this.isLoggedIn = false;
-        Navigation.navigateTo('admin-login');
+        Navigation.navigateTo('login');
         DB.showToast('Logged Out', 'You have been logged out.', 'info');
       });
     }

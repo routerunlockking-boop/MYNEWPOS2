@@ -1,21 +1,13 @@
 /**
  * Smart Zone LK - Auth Module
- * Handles customer authentication (login/register)
+ * Handles customer & admin authentication via Unified Portal
  */
 
 const Auth = {
   init() {
     this.updateAuthUI();
-    this.setupModalClose();
-    this.setupLoginSubmit();
-    this.setupRegisterSubmit();
-    this.setupAuthSwitch();
-    this.setupSocialLogins();
-  },
-
-  // Setup account button
-  setupAccountButton() {
-    // Legacy mapping (now handled in updateAuthUI)
+    this.setupPortalSwitch();
+    this.setupPortalSubmit();
   },
 
   // Update UI based on authentication status
@@ -38,121 +30,122 @@ const Auth = {
                 localStorage.removeItem('sz_user');
                 DB.showToast('Logged Out', 'You have been logged out successfully.', 'info');
                 this.updateAuthUI();
+                navigateTo('home');
             }
         });
     } else {
         newBtn.innerHTML = '<i class="fas fa-user"></i>';
         newBtn.title = 'Account';
-        newBtn.addEventListener('click', () => this.openModal('login'));
+        newBtn.addEventListener('click', () => this.openPortal('login'));
     }
   },
 
-  // Open auth modal
+  // Open auth portal
+  openPortal(type) {
+    navigateTo('login');
+    this.togglePortalMode(type);
+  },
+
   openModal(type) {
-    document.getElementById('authModal').classList.add('active');
-    this.toggleForm(type);
+    // Legacy support for checkout.js calling openModal
+    this.openPortal(type);
   },
 
-  // Close auth modal
-  closeModal() {
-    document.getElementById('authModal').classList.remove('active');
-  },
-
-  // Setup modal close
-  setupModalClose() {
-    const closeBtn = document.getElementById('authCloseBtn');
-    const overlay = document.getElementById('authModal');
+  // Toggle between login and register modes in portal
+  togglePortalMode(type) {
+    const title = document.getElementById('portalTitle');
+    const subtitle = document.getElementById('portalSubtitle');
+    const regFields = document.getElementById('portalRegFields');
+    const rememberDiv = document.getElementById('portalRememberDiv');
+    const submitBtn = document.getElementById('portalSubmitBtn');
+    const switchText = document.getElementById('portalSwitchText');
     
-    if (closeBtn) closeBtn.addEventListener('click', () => this.closeModal());
-    if (overlay) {
-      overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) this.closeModal();
-      });
-    }
-  },
+    if (!title) return;
 
-  // Toggle between login and register forms
-  toggleForm(type) {
     if (type === 'login') {
-      document.getElementById('loginForm').style.display = 'block';
-      document.getElementById('registerForm').style.display = 'none';
-      document.getElementById('authTitle').textContent = 'Sign In';
-      document.getElementById('authSwitch').innerHTML = 'Don\\'t have an account? <a href="#" id="showRegisterLink">Sign Up</a>';
+      title.textContent = 'Sign In';
+      subtitle.textContent = 'Access your account or admin dashboard';
+      regFields.style.display = 'none';
+      rememberDiv.style.display = 'flex';
+      submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+      submitBtn.dataset.mode = 'login';
+      switchText.innerHTML = "Don't have an account? <a href=\"#\" id=\"portalSwitchLink\" style=\"color:var(--primary);font-weight:600;\">Sign Up</a>";
     } else {
-      document.getElementById('loginForm').style.display = 'none';
-      document.getElementById('registerForm').style.display = 'block';
-      document.getElementById('authTitle').textContent = 'Create Account';
-      document.getElementById('authSwitch').innerHTML = 'Already have an account? <a href="#" id="showLoginLink">Sign In</a>';
+      title.textContent = 'Create Account';
+      subtitle.textContent = 'Join Smart Zone LK today';
+      regFields.style.display = 'block';
+      rememberDiv.style.display = 'none';
+      submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Register';
+      submitBtn.dataset.mode = 'register';
+      switchText.innerHTML = 'Already have an account? <a href="#" id="portalSwitchLink" style="color:var(--primary);font-weight:600;">Sign In</a>';
     }
-    this.setupAuthSwitch();
-  },
-
-  // Setup auth form switching
-  setupAuthSwitch() {
-    const registerLink = document.getElementById('showRegisterLink');
-    const loginLink = document.getElementById('showLoginLink');
     
-    if (registerLink) {
-      registerLink.addEventListener('click', (e) => {
+    // Re-bind the switch link
+    const newLink = document.getElementById('portalSwitchLink');
+    if (newLink) {
+      newLink.addEventListener('click', (e) => {
         e.preventDefault();
-        this.toggleForm('register');
-      });
-    }
-    if (loginLink) {
-      loginLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        this.toggleForm('login');
+        this.togglePortalMode(type === 'login' ? 'register' : 'login');
       });
     }
   },
 
-  // Setup login submit
-  setupLoginSubmit() {
-    const btn = document.getElementById('loginSubmitBtn');
-    if (btn) {
-      btn.addEventListener('click', () => {
-        const email = document.getElementById('loginEmail').value.trim();
-        const password = document.getElementById('loginPassword').value.trim();
-        if (!email || !password) {
-          DB.showToast('Error', 'Please fill in all fields.', 'error');
-          return;
-        }
-        
-        // Demo admin login bypassing db check
+  setupPortalSwitch() {
+    this.togglePortalMode('login'); // Default state
+  },
+
+  // Setup unified portal submit
+  setupPortalSubmit() {
+    const btn = document.getElementById('portalSubmitBtn');
+    if (!btn) return;
+    
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.mode;
+      const email = document.getElementById('portalEmail').value.trim();
+      const password = document.getElementById('portalPassword').value.trim();
+      
+      if (!email || !password) {
+        DB.showToast('Error', 'Please fill in all required fields.', 'error');
+        return;
+      }
+
+      if (mode === 'login') {
+        // Admin login check
         if(email === 'admin@smartzonelk.com' && password === 'admin123') {
             const adminUser = { name: 'Admin User', email: 'admin@smartzonelk.com', phone: '', role: 'admin' };
             localStorage.setItem('sz_user', JSON.stringify(adminUser));
             DB.showToast('Admin Login', 'Welcome back, Admin!', 'success');
             this.updateAuthUI();
-            this.closeModal();
-            Navigation.navigateTo('admin');
+            
+            // Clear fields
+            document.getElementById('portalPassword').value = '';
+            
+            navigateTo('admin');
             return;
         }
 
+        // Customer login check
         const customers = DB.getCustomers();
         const customer = customers.find(c => c.email === email);
         if (customer) {
             localStorage.setItem('sz_user', JSON.stringify(customer));
             DB.showToast('Welcome Back!', 'You have signed in successfully.', 'success');
             this.updateAuthUI();
-            this.closeModal();
+            
+            // Clear fields
+            document.getElementById('portalPassword').value = '';
+            
+            navigateTo('home');
         } else {
             DB.showToast('Error', 'Invalid email or password.', 'error');
         }
-      });
-    }
-  },
-
-  // Setup register submit
-  setupRegisterSubmit() {
-    const btn = document.getElementById('registerSubmitBtn');
-    if (btn) {
-      btn.addEventListener('click', () => {
-        const name = document.getElementById('regName').value.trim();
-        const email = document.getElementById('regEmail').value.trim();
-        const phone = document.getElementById('regPhone').value.trim();
-        const password = document.getElementById('regPassword').value.trim();
-        if (!name || !email || !phone || !password) {
+        
+      } else {
+        // Register Mode
+        const name = document.getElementById('portalName').value.trim();
+        const phone = document.getElementById('portalPhone').value.trim();
+        
+        if (!name || !phone) {
           DB.showToast('Error', 'Please fill in all fields.', 'error');
           return;
         }
@@ -170,18 +163,16 @@ const Auth = {
 
         DB.showToast('Account Created!', 'Welcome to Smart Zone LK!', 'success');
         this.updateAuthUI();
-        this.closeModal();
-      });
-    }
-  },
-
-  // Setup social login buttons
-  setupSocialLogins() {
-    const googleBtn = document.getElementById('googleLoginBtn');
-    const phoneBtn = document.getElementById('phoneLoginBtn');
-    
-    if (googleBtn) googleBtn.addEventListener('click', () => DB.showToast('Google Sign-In', 'Feature coming soon!', 'info'));
-    if (phoneBtn) phoneBtn.addEventListener('click', () => DB.showToast('Phone Login', 'Feature coming soon!', 'info'));
+        
+        // Clear fields
+        ['portalName', 'portalPhone', 'portalEmail', 'portalPassword'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        
+        navigateTo('home');
+      }
+    });
   }
 };
 
