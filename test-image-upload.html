@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Product Image Upload Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 30px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9; }
+        .success { color: #28a745; background: #d4edda; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .feature { background: #e8f5e8; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #28a745; }
+        .demo-btn { background: #007bff; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin: 10px 5px; }
+        .demo-btn:hover { background: #0056b3; }
+        .step { background: #fff; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #007bff; }
+        .code { background: #f8f9fa; padding: 10px; border-radius: 3px; font-family: monospace; margin: 5px 0; }
+        .highlight { background: #fff3cd; padding: 2px 4px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖼️ Product Image Upload - Test & Demo</h1>
+            <p style="color: #666;">Complete image upload functionality is ready for testing!</p>
+        </div>
+
+        <div class="test-section">
+            <h2>✅ Image Upload Features Implemented:</h2>
+            
+            <div class="feature">
+                <h3>📤 File Upload Button</h3>
+                <ul>
+                    <li>Click "Upload Image" button to browse files</li>
+                    <li>Accepts all image formats (JPG, PNG, GIF, etc.)</li>
+                    <li>File validation ensures only images are selected</li>
+                    <li>Hidden file input for clean UI</li>
+                </ul>
+            </div>
+
+            <div class="feature">
+                <h3>👁️ Real-time Preview</h3>
+                <ul>
+                    <li>80x80px thumbnail preview appears instantly</li>
+                    <li>Shows rounded corners and border</li>
+                    <li>Updates as soon as image is selected</li>
+                    <li>Professional presentation</li>
+                </ul>
+            </div>
+
+            <div class="feature">
+                <h3>🔗 URL Input Alternative</h3>
+                <ul>
+                    <li>Text field for direct image URL input</li>
+                    <li>Supports HTTP/HTTPS URLs</li>
+                    <li>Supports Base64 data URLs</li>
+                    <li>Live preview when URL is entered</li>
+                </ul>
+            </div>
+
+            <div class="feature">
+                <h3>💾 Data Storage</h3>
+                <ul>
+                    <li>Images converted to Base64 for localStorage</li>
+                    <li>No server upload required</li>
+                    <li>Persistent storage in browser</li>
+                    <li>Works with existing product system</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🧪 How to Test Image Upload:</h2>
+            
+            <div class="step">
+                <h3>Step 1: Access Admin Panel</h3>
+                <p>Open the admin dashboard and login with credentials:</p>
+                <div class="code">Email: smartzonelk101@gmail.com<br>Password: 200723800385@</div>
+                <button class="demo-btn" onclick="window.open('http://localhost:8000', '_blank')">🚀 Open Admin Panel</button>
+            </div>
+
+            <div class="step">
+                <h3>Step 2: Add New Product</h3>
+                <p>Navigate to <span class="highlight">Add Product</span> section in the admin sidebar</p>
+            </div>
+
+            <div class="step">
+                <h3>Step 3: Test Image Upload</h3>
+                <p>In the product form, find the <span class="highlight">Product Image</span> section:</p>
+                <ul>
+                    <li>Click <strong>"Upload Image"</strong> button</li>
+                    <li>Select any image file from your computer</li>
+                    <li>Watch the preview appear instantly</li>
+                    <li>See the Base64 data in the URL field</li>
+                    <li>Fill other product details</li>
+                    <li>Click <strong>"Save Product"</strong></li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <h3>Step 4: Test URL Input</h3>
+                <p>Alternatively, test the URL input:</p>
+                <ul>
+                    <li>Paste any image URL in the text field</li>
+                    <li>See the preview update automatically</li>
+                    <li>Works with external image links</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <h3>Step 5: Verify Saved Product</h3>
+                <p>Check that your product with image appears in:</p>
+                <ul>
+                    <li>Admin Products table</li>
+                    <li>Main shop page</li>
+                    <li>Product detail pages</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🎯 Quick Test Options:</h2>
+            
+            <div style="text-align: center; margin: 20px 0;">
+                <button class="demo-btn" onclick="testWithSampleImage()">
+                    🖼️ Test with Sample Image
+                </button>
+                <button class="demo-btn" onclick="window.open('http://localhost:8000/test-upload.html', '_blank')">
+                    🧪 Standalone Upload Test
+                </button>
+                <button class="demo-btn" onclick="window.open('http://localhost:8000', '_blank')">
+                    🎮 Go to Admin Panel
+                </button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>✨ What You'll See:</h2>
+            
+            <div class="success">
+                <h3>🎉 Working Features:</h3>
+                <ul>
+                    <li>✅ Image file selection dialog opens</li>
+                    <li>✅ Image validation (only images allowed)</li>
+                    <li>✅ Real-time preview (80x80px thumbnail)</li>
+                    <li>✅ Base64 conversion and storage</li>
+                    <li>✅ URL input with live preview</li>
+                    <li>✅ Form integration with save functionality</li>
+                    <li>✅ Product display with uploaded images</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔧 Technical Details:</h2>
+            <div class="feature">
+                <h3>Implementation:</h3>
+                <ul>
+                    <li><strong>File Input:</strong> Hidden input triggered by button</li>
+                    <li><strong>Validation:</strong> File type checking (image/*)</li>
+                    <li><strong>Conversion:</strong> FileReader API to Base64</li>
+                    <li><strong>Storage:</strong> Base64 string in localStorage</li>
+                    <li><strong>Preview:</strong> Real-time thumbnail generation</li>
+                    <li><strong>Fallback:</strong> URL input for external images</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding: 20px; background: #007bff; color: white; border-radius: 10px;">
+            <h2>🚀 Ready to Test!</h2>
+            <p>The image upload functionality is fully implemented and working.</p>
+            <button class="demo-btn" style="background: white; color: #007bff; font-size: 18px; padding: 15px 30px;" onclick="window.open('http://localhost:8000', '_blank')">
+                🎯 Test Image Upload Now
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function testWithSampleImage() {
+            // Create a sample image for testing
+            const canvas = document.createElement('canvas');
+            canvas.width = 200;
+            canvas.height = 200;
+            const ctx = canvas.getContext('2d');
+            
+            // Draw a colorful test pattern
+            const gradient = ctx.createLinearGradient(0, 0, 200, 200);
+            gradient.addColorStop(0, '#007bff');
+            gradient.addColorStop(0.5, '#28a745');
+            gradient.addColorStop(1, '#ffc107');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 200, 200);
+            
+            // Add text
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('TEST IMAGE', 100, 100);
+            
+            // Convert to data URL
+            const dataUrl = canvas.toDataURL('image/png');
+            
+            // Show success message
+            alert('Sample test image created!\n\nNow go to the admin panel and:\n1. Click "Add Product"\n2. Click "Upload Image"\n3. Select this test image from your downloads\n4. See the preview appear!');
+            
+            // Download the test image
+            const link = document.createElement('a');
+            link.download = 'test-product-image.png';
+            link.href = dataUrl;
+            link.click();
+        }
+    </script>
+</body>
+</html>
