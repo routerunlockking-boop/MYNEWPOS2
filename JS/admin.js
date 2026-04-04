@@ -171,6 +171,8 @@ const Admin = {
           <td>
             <div class="action-btns">
               <button class="action-btn" onclick="Admin.viewOrderDetail('${o.id}')" title="View"><i class="fas fa-eye"></i></button>
+              <button class="action-btn" onclick="Admin.printShippingLabel('${o.id}')" title="Print Shipping Label"><i class="fas fa-print"></i></button>
+              <button class="action-btn delete" onclick="Admin.deleteOrder('${o.id}')" title="Delete"><i class="fas fa-trash"></i></button>
             </div>
           </td>
         </tr>
@@ -280,6 +282,191 @@ const Admin = {
     }).join('\n');
     
     alert(`Order: ${order.id}\nCustomer: ${order.customer}\nPhone: ${order.phone}\nEmail: ${order.email}\nAddress: ${order.address}\nDistrict: ${order.district}, ${order.city}\nPayment: ${order.payment.toUpperCase()}\nStatus: ${order.status}\n\nItems:\n${itemsDetail}\n\nTotal: ${DB.formatLKR(order.total)}`);
+  },
+
+  // Delete order
+  deleteOrder(orderId) {
+    if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) return;
+    
+    let orders = DB.getOrders();
+    orders = orders.filter(o => o.id !== orderId);
+    DB.setOrders(orders);
+    this.renderOrders();
+    this.renderDashboard(); // Update dashboard stats
+    DB.showToast('Order Deleted', `Order ${orderId} has been removed.`, 'success');
+  },
+
+  // Print shipping label
+  printShippingLabel(orderId) {
+    const orders = DB.getOrders();
+    const order = orders.find(o => o.id === orderId);
+    if (!order) {
+      DB.showToast('Error', 'Order not found.', 'error');
+      return;
+    }
+
+    // Create shipping label HTML
+    const shippingLabel = this.generateShippingLabel(order);
+    
+    // Open new window for printing
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(shippingLabel);
+    printWindow.document.close();
+    
+    // Wait for content to load, then print
+    setTimeout(() => {
+      printWindow.print();
+    }, 500);
+    
+    DB.showToast('Shipping Label', `Shipping label for ${orderId} ready for printing.`, 'success');
+  },
+
+  // Generate shipping label HTML
+  generateShippingLabel(order) {
+    const products = DB.getProducts();
+    const itemsHtml = order.items.map(item => {
+      const product = products.find(p => p.id === item.productId);
+      return `
+        <tr style="border-bottom: 1px solid #eee;">
+          <td style="padding: 8px;">${product ? product.name : 'Unknown Product'}</td>
+          <td style="padding: 8px; text-align: center;">${item.qty}</td>
+          <td style="padding: 8px; text-align: right;">${DB.formatLKR(item.price)}</td>
+          <td style="padding: 8px; text-align: right;">${DB.formatLKR(item.price * item.qty)}</td>
+        </tr>
+      `;
+    }).join('');
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Shipping Label - ${order.id}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+          .label-container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            border: 2px solid #333; 
+            padding: 20px; 
+            background: white;
+          }
+          .header { 
+            text-align: center; 
+            border-bottom: 2px solid #333; 
+            padding-bottom: 15px; 
+            margin-bottom: 20px; 
+          }
+          .header h1 { margin: 0; font-size: 24px; color: #333; }
+          .header .order-id { font-size: 18px; font-weight: bold; color: #007bff; }
+          .address-section { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 20px; 
+            border: 1px solid #ddd; 
+            padding: 15px; 
+            background: #f9f9f9;
+          }
+          .from-address, .to-address { flex: 1; }
+          .from-address { margin-right: 20px; }
+          .section-title { font-weight: bold; margin-bottom: 10px; color: #333; }
+          .items-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 20px; 
+          }
+          .items-table th { 
+            background: #333; 
+            color: white; 
+            padding: 10px; 
+            text-align: left; 
+          }
+          .total-section { 
+            text-align: right; 
+            font-size: 18px; 
+            font-weight: bold; 
+            border-top: 2px solid #333; 
+            padding-top: 15px; 
+          }
+          .barcode { 
+            text-align: center; 
+            margin-top: 20px; 
+            padding: 10px; 
+            border: 1px dashed #ccc; 
+            background: #f0f0f0;
+          }
+          .footer { 
+            text-align: center; 
+            margin-top: 20px; 
+            font-size: 12px; 
+            color: #666; 
+          }
+          @media print {
+            body { padding: 10px; }
+            .label-container { border: 1px solid #333; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="label-container">
+          <div class="header">
+            <h1>Smart Zone LK</h1>
+            <div class="order-id">Order ID: ${order.id}</div>
+          </div>
+          
+          <div class="address-section">
+            <div class="from-address">
+              <div class="section-title">FROM:</div>
+              <div><strong>Smart Zone LK</strong></div>
+              <div>No. 45, Galle Road</div>
+              <div>Colombo 03, Sri Lanka</div>
+              <div>+94 78 68000 86</div>
+              <div>info@smartzonelk.com</div>
+            </div>
+            
+            <div class="to-address">
+              <div class="section-title">TO:</div>
+              <div><strong>${order.customer}</strong></div>
+              <div>${order.address}</div>
+              <div>${order.city}, ${order.district}</div>
+              <div>Sri Lanka</div>
+              <div>${order.phone}</div>
+              <div>${order.email}</div>
+            </div>
+          </div>
+          
+          <div class="section-title">ORDER ITEMS:</div>
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th style="text-align: center;">Qty</th>
+                <th style="text-align: right;">Price</th>
+                <th style="text-align: right;">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHtml}
+            </tbody>
+          </table>
+          
+          <div class="total-section">
+            Total Amount: ${DB.formatLKR(order.total)}
+          </div>
+          
+          <div class="barcode">
+            <div>${order.id}</div>
+            <small>Scan for order tracking</small>
+          </div>
+          
+          <div class="footer">
+            <div>Payment Method: ${order.payment.toUpperCase()}</div>
+            <div>Order Date: ${order.date}</div>
+            <div>Order Status: ${order.status.toUpperCase()}</div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
   },
 
   // Edit product
@@ -456,7 +643,7 @@ const Admin = {
       const reader = new FileReader();
       reader.onload = (e) => {
         this.showImagePreview(e.target.result);
-        // Update the URL input with base64 data
+        // Update URL input with base64 data
         const urlInput = document.getElementById('prodImageUrl');
         if (urlInput) {
           urlInput.value = e.target.result;
