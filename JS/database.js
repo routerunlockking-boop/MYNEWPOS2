@@ -190,6 +190,12 @@ const DB = {
     const total = cart.reduce((sum, item) => sum + item.qty, 0);
     const badge = document.getElementById('cartBadge');
     if (badge) badge.textContent = total;
+    
+    const bottomBadge = document.getElementById('bottomCartBadge');
+    if (bottomBadge) {
+        bottomBadge.textContent = total;
+        bottomBadge.style.display = total > 0 ? 'flex' : 'none';
+    }
   }
 };
 
