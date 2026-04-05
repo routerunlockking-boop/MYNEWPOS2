@@ -13,6 +13,7 @@ const Admin = {
     this.setupSaveProduct();
     this.setupClearForm();
     this.setupOrderConfirmModal();
+    this.setupAdminNavigation();
   },
 
   // Show admin section
@@ -1180,6 +1181,18 @@ const Admin = {
         if (e.target === overlay) overlay.classList.remove('active');
       });
     }
+  },
+
+  // Setup admin navigation
+  setupAdminNavigation() {
+    // Handle admin navigation clicks
+    document.querySelectorAll('[data-admin]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const section = link.getAttribute('data-admin');
+        this.showSection(section);
+      });
+    });
   }
 };
 
