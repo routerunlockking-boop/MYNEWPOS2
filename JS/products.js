@@ -51,18 +51,12 @@ const Products = {
     if (product.wifi) specTags.push(`<span class="spec-tag">${product.wifi}</span>`);
     if (product.speed) specTags.push(`<span class="spec-tag">${product.speed}</span>`);
     
-    // Product image - use actual image or placeholder
-    const productImage = product.imgUrl 
-      ? `<img src="${product.imgUrl}" alt="${product.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-         <div style="display:none; align-items:center; justify-content:center; height:100%; background:var(--gray-100);"><i class="fas fa-wifi"></i></div>`
-      : `<div style="display:flex; align-items:center; justify-content:center; height:100%; background:var(--gray-100);"><i class="fas fa-wifi"></i></div>`;
-    
     return `
       <div class="product-card" data-id="${product.id}">
         <div class="product-image">
           ${badges}
           <button class="wishlist-btn" onclick="event.stopPropagation();DB.showToast('Wishlist','Added to wishlist!','success')"><i class="far fa-heart"></i></button>
-          ${productImage}
+          <i class="fas fa-wifi"></i>
         </div>
         <div class="product-info">
           <div class="brand">${product.brand}</div>
@@ -112,20 +106,9 @@ const Products = {
     
     document.getElementById('productDetail').innerHTML = `
       <div class="product-gallery">
-        <div class="main-image">
-          ${product.imgUrl 
-            ? `<img src="${product.imgUrl}" alt="${product.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-               <div style="display:none; align-items:center; justify-content:center; height:100%; background:var(--gray-100);"><i class="fas fa-wifi"></i></div>`
-            : `<div style="display:flex; align-items:center; justify-content:center; height:100%; background:var(--gray-100);"><i class="fas fa-wifi"></i></div>`
-          }
-        </div>
+        <div class="main-image"><i class="fas fa-wifi"></i></div>
         <div class="thumb-images">
-          <div class="thumb active">
-            ${product.imgUrl 
-              ? `<img src="${product.imgUrl}" alt="${product.name}" style="width:100%; height:100%; object-fit:cover;">`
-              : `<i class="fas fa-wifi"></i>`
-            }
-          </div>
+          <div class="thumb active"><i class="fas fa-wifi"></i></div>
           <div class="thumb"><i class="fas fa-box"></i></div>
           <div class="thumb"><i class="fas fa-cog"></i></div>
           <div class="thumb"><i class="fas fa-image"></i></div>

@@ -113,6 +113,36 @@ const Orders = {
                         }).join('')}
                     </div>
                     
+                    ${order.trackingNumber && (order.status === 'shipped' || order.status === 'delivered') ? `
+                        <div style="margin-top:20px;padding:16px;background:var(--primary-light);border-radius:12px;border:1px solid var(--primary);">
+                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                                <i class="fas fa-truck" style="color:var(--primary);"></i>
+                                <span style="font-weight:700;color:var(--primary);">Tracking Information</span>
+                            </div>
+                            <div style="display:grid;gap:8px;font-size:0.9rem;">
+                                <div style="display:flex;justify-content:space-between;">
+                                    <span style="color:var(--gray-600);">Carrier:</span>
+                                    <span style="font-weight:600;color:var(--dark);">${order.carrier}</span>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;">
+                                    <span style="color:var(--gray-600);">Tracking Number:</span>
+                                    <span style="font-weight:600;color:var(--dark);font-family:monospace;">${order.trackingNumber}</span>
+                                </div>
+                                ${order.estimatedDelivery ? `
+                                    <div style="display:flex;justify-content:space-between;">
+                                        <span style="color:var(--gray-600);">Est. Delivery:</span>
+                                        <span style="font-weight:600;color:var(--dark);">${order.estimatedDelivery}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            ${order.trackingUrl ? `
+                                <button class="btn btn-primary btn-sm" style="margin-top:12px;width:100%;" onclick="window.open('${order.trackingUrl}', '_blank')">
+                                    <i class="fas fa-external-link-alt"></i> Track Package
+                                </button>
+                            ` : ''}
+                        </div>
+                    ` : ''}
+                    
                     <div style="margin-top:24px;display:flex;justify-content:flex-end;gap:12px;">
                         <button class="btn btn-outline btn-sm" style="border-color:var(--gray-200);color:var(--gray-700);background:white;" onclick="DB.showToast('Support','Loading support for order #${order.id}...','info')"><i class="fas fa-headset"></i> Get Help</button>
                     </div>

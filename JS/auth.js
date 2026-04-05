@@ -30,7 +30,14 @@ const Auth = {
                 localStorage.removeItem('sz_user');
                 DB.showToast('Logged Out', 'You have been logged out successfully.', 'info');
                 this.updateAuthUI();
-                navigateTo('home');
+                // Use proper navigation
+                if (typeof Navigation !== 'undefined' && Navigation.navigateTo) {
+                  Navigation.navigateTo('home');
+                } else if (typeof navigateTo === 'function') {
+                  navigateTo('home');
+                } else {
+                  window.location.hash = '#home';
+                }
             }
         });
     } else {
@@ -97,12 +104,18 @@ const Auth = {
   // Setup unified portal submit
   setupPortalSubmit() {
     const btn = document.getElementById('portalSubmitBtn');
-    if (!btn) return;
+    if (!btn) {
+      console.error('Auth: Submit button not found');
+      return;
+    }
     
     btn.addEventListener('click', () => {
-      const mode = btn.dataset.mode;
-      const email = document.getElementById('portalEmail').value.trim();
-      const password = document.getElementById('portalPassword').value.trim();
+      console.log('Auth: Login button clicked');
+      const mode = btn.dataset.mode || 'login';
+      const email = document.getElementById('portalEmail')?.value.trim() || '';
+      const password = document.getElementById('portalPassword')?.value.trim() || '';
+      
+      console.log('Auth: Attempting login - Mode:', mode, 'Email:', email);
       
       if (!email || !password) {
         DB.showToast('Error', 'Please fill in all required fields.', 'error');
@@ -112,38 +125,62 @@ const Auth = {
       if (mode === 'login') {
         // Admin login check
         if(email === 'smartzonelk101@gmail.com' && password === '200723800385@') {
+            console.log('Auth: Admin login successful');
             const adminUser = { name: 'Admin User', email: 'smartzonelk101@gmail.com', phone: '', role: 'admin' };
             localStorage.setItem('sz_user', JSON.stringify(adminUser));
             DB.showToast('Admin Login', 'Welcome back, Admin!', 'success');
             this.updateAuthUI();
             
             // Clear fields
-            document.getElementById('portalPassword').value = '';
+            const passwordField = document.getElementById('portalPassword');
+            if (passwordField) passwordField.value = '';
             
-            navigateTo('admin');
+            // Use proper navigation
+            if (typeof Navigation !== 'undefined' && Navigation.navigateTo) {
+              Navigation.navigateTo('admin');
+            } else if (typeof navigateTo === 'function') {
+              navigateTo('admin');
+            } else {
+              console.error('Auth: Navigation function not available');
+              window.location.hash = '#admin';
+            }
             return;
         }
 
         // Customer login check
         const customers = DB.getCustomers();
+        console.log('Auth: Checking customer login, available customers:', customers.length);
         const customer = customers.find(c => c.email === email);
         if (customer) {
+            console.log('Auth: Customer login successful for:', customer.name);
             localStorage.setItem('sz_user', JSON.stringify(customer));
             DB.showToast('Welcome Back!', 'You have signed in successfully.', 'success');
             this.updateAuthUI();
             
             // Clear fields
-            document.getElementById('portalPassword').value = '';
+            const passwordField = document.getElementById('portalPassword');
+            if (passwordField) passwordField.value = '';
             
-            navigateTo('home');
+            // Use proper navigation
+            if (typeof Navigation !== 'undefined' && Navigation.navigateTo) {
+              Navigation.navigateTo('home');
+            } else if (typeof navigateTo === 'function') {
+              navigateTo('home');
+            } else {
+              console.error('Auth: Navigation function not available');
+              window.location.hash = '#home';
+            }
         } else {
+            console.log('Auth: Customer login failed - email not found:', email);
             DB.showToast('Error', 'Invalid email or password.', 'error');
         }
         
       } else {
         // Register Mode
-        const name = document.getElementById('portalName').value.trim();
-        const phone = document.getElementById('portalPhone').value.trim();
+        const name = document.getElementById('portalName')?.value.trim() || '';
+        const phone = document.getElementById('portalPhone')?.value.trim() || '';
+        
+        console.log('Auth: Attempting registration - Name:', name, 'Email:', email);
         
         if (!name || !phone) {
           DB.showToast('Error', 'Please fill in all fields.', 'error');
@@ -152,6 +189,7 @@ const Auth = {
 
         const customers = DB.getCustomers();
         if (customers.find(c => c.email === email)) {
+            console.log('Auth: Registration failed - email already exists:', email);
             DB.showToast('Error', 'Email already exists.', 'error');
             return;
         }
@@ -161,6 +199,7 @@ const Auth = {
         localStorage.setItem('sz_customers', JSON.stringify(customers));
         localStorage.setItem('sz_user', JSON.stringify(newCustomer));
 
+        console.log('Auth: Registration successful for:', newCustomer.name);
         DB.showToast('Account Created!', 'Welcome to Smart Zone LK!', 'success');
         this.updateAuthUI();
         
@@ -170,11 +209,58 @@ const Auth = {
             if (el) el.value = '';
         });
         
-        navigateTo('home');
+        // Use proper navigation
+        if (typeof Navigation !== 'undefined' && Navigation.navigateTo) {
+          Navigation.navigateTo('home');
+        } else if (typeof navigateTo === 'function') {
+          navigateTo('home');
+        } else {
+          console.error('Auth: Navigation function not available');
+          window.location.hash = '#home';
+        }
       }
     });
+  },
+
+  // Emergency admin access - call from console: Auth.emergencyAdminLogin()
+  emergencyAdminLogin() {
+    console.log('Auth: Emergency admin login triggered');
+    const adminUser = { name: 'Admin User', email: 'smartzonelk101@gmail.com', phone: '', role: 'admin' };
+    localStorage.setItem('sz_user', JSON.stringify(adminUser));
+    DB.showToast('Emergency Access', 'Admin access granted!', 'success');
+    this.updateAuthUI();
+    
+    if (typeof Navigation !== 'undefined' && Navigation.navigateTo) {
+      Navigation.navigateTo('admin');
+    } else if (typeof navigateTo === 'function') {
+      navigateTo('admin');
+    } else {
+      window.location.hash = '#admin';
+      location.reload();
+    }
+  },
+
+  // Debug function to check auth status
+  debugAuthStatus() {
+    const userStr = localStorage.getItem('sz_user');
+    const user = userStr ? JSON.parse(userStr) : null;
+    console.log('Auth Status Debug:', {
+      isLoggedIn: !!user,
+      userInfo: user,
+      customersAvailable: DB.getCustomers().length,
+      navigationAvailable: typeof Navigation !== 'undefined',
+      globalNavigateTo: typeof navigateTo !== 'undefined'
+    });
+    return user;
   }
 };
 
 // Initialize
-document.addEventListener('DOMContentLoaded', () => Auth.init());
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('Auth: Initializing auth module');
+  Auth.init();
+  
+  // Make emergency functions available globally
+  window.Auth = Auth;
+  console.log('Auth: Emergency functions available - call Auth.emergencyAdminLogin() or Auth.debugAuthStatus()');
+});
