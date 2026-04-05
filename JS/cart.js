@@ -92,7 +92,7 @@ const Cart = {
       `;
     });
     
-    const delivery = subtotal >= 15000 ? 0 : 350;
+    const delivery = 400;
     const total = subtotal + delivery;
     
     container.innerHTML = `
@@ -101,8 +101,7 @@ const Cart = {
         <div class="cart-summary">
           <h3>Order Summary</h3>
           <div class="summary-row"><span>Subtotal</span><span>${DB.formatLKR(subtotal)}</span></div>
-          <div class="summary-row"><span>Delivery</span><span>${delivery === 0 ? '<span style="color:var(--success);font-weight:600;">FREE</span>' : DB.formatLKR(delivery)}</span></div>
-          ${delivery === 0 ? '<div style="font-size:0.8rem;color:var(--success);text-align:right;">✓ Free delivery applied!</div>' : ''}
+          <div class="summary-row"><span>Delivery</span><span>${DB.formatLKR(delivery)}</span></div>
           <div class="summary-row total"><span>Total</span><span>${DB.formatLKR(total)}</span></div>
           <div class="promo-code">
             <input type="text" placeholder="Promo code">
