@@ -664,6 +664,7 @@ const Admin = {
             <div class="action-btns">
               <button class="action-btn" onclick="Admin.viewOrderDetail('${o.id}')" title="View"><i class="fas fa-eye"></i></button>
               <button class="action-btn" onclick="Admin.manageTracking('${o.id}')" title="Manage Tracking"><i class="fas fa-truck"></i></button>
+              ${o.trackingNumber ? `<button class="action-btn" onclick="Admin.addTrackingUpdate('${o.id}')" title="Add Update"><i class="fas fa-plus-circle"></i></button>` : ''}
             </div>
           </td>
         </tr>
@@ -795,20 +796,169 @@ const Admin = {
     let orders = DB.getOrders();
     const order = orders.find(o => o.id === orderId);
     if (order) {
+      const isNewTracking = !order.trackingNumber;
+      
       order.carrier = carrier;
       order.trackingNumber = trackingNumber;
       order.trackingUrl = trackingUrl;
       order.estimatedDelivery = estimatedDelivery;
       
+      // Initialize tracking history if it doesn't exist
+      if (!order.trackingHistory) {
+        order.trackingHistory = [];
+      }
+      
+      // Add initial tracking event if this is a new tracking number
+      if (isNewTracking) {
+        order.trackingHistory.push({
+          timestamp: new Date().toISOString(),
+          status: 'Tracking Information Added',
+          location: 'Smart Zone System',
+          description: `Tracking number ${trackingNumber} assigned via ${carrier}`
+        });
+      }
+      
       // Auto-update status to shipped if not already shipped/delivered
       if (order.status === 'confirmed' || order.status === 'processing') {
         order.status = 'shipped';
+        
+        // Add shipped status to tracking history
+        order.trackingHistory.push({
+          timestamp: new Date().toISOString(),
+          status: 'Order Shipped',
+          location: carrier + ' Facility',
+          description: 'Package has been shipped and is in transit'
+        });
       }
       
       DB.setOrders(orders);
       document.getElementById('trackingModal').remove();
       this.renderOrders();
       DB.showToast('Tracking Updated', `Tracking details saved for ${orderId}`, 'success');
+    }
+  },
+
+  // Add tracking update
+  addTrackingUpdate(orderId) {
+    const orders = DB.getOrders();
+    const order = orders.find(o => o.id === orderId);
+    if (!order || !order.trackingNumber) {
+      DB.showToast('Error', 'Please add tracking information first', 'error');
+      return;
+    }
+    
+    const modal = this.createTrackingUpdateModal(order);
+    document.body.appendChild(modal);
+    modal.classList.add('active');
+  },
+
+  // Create tracking update modal
+  createTrackingUpdateModal(order) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'trackingUpdateModal';
+    modal.innerHTML = `
+      <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header">
+          <h3><i class="fas fa-plus-circle"></i> Add Tracking Update - Order ${order.id}</h3>
+          <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div style="background:var(--primary-light);padding:12px;border-radius:8px;margin-bottom:16px;">
+            <div style="font-size:0.85rem;color:var(--gray-600);margin-bottom:4px;">Current Tracking</div>
+            <div style="font-weight:600;color:var(--primary);">${order.carrier} - ${order.trackingNumber}</div>
+          </div>
+          
+          <form id="trackingUpdateForm">
+            <div class="form-group">
+              <label for="updateStatus">Status *</label>
+              <select id="updateStatus" class="form-control" required>
+                <option value="">Select Status</option>
+                <option value="Order Confirmed">Order Confirmed</option>
+                <option value="Package Picked Up">Package Picked Up</option>
+                <option value="In Transit">In Transit</option>
+                <option value="Out for Delivery">Out for Delivery</option>
+                <option value="Delivered">Delivered</option>
+                <option value="Delivery Attempted">Delivery Attempted</option>
+                <option value="Custom Status">Custom Status</option>
+              </select>
+            </div>
+            <div class="form-group" id="customStatusGroup" style="display:none;">
+              <label for="customStatus">Custom Status</label>
+              <input type="text" id="customStatus" class="form-control" placeholder="Enter custom status">
+            </div>
+            <div class="form-group">
+              <label for="updateLocation">Location *</label>
+              <input type="text" id="updateLocation" class="form-control" placeholder="e.g. Colombo Sorting Center" required>
+            </div>
+            <div class="form-group">
+              <label for="updateDescription">Description *</label>
+              <textarea id="updateDescription" class="form-control" rows="3" placeholder="Describe the current status or activity" required></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="this.closest('.modal').remove()">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="Admin.saveTrackingUpdate('${order.id}')">Add Update</button>
+        </div>
+      </div>
+    `;
+    
+    // Add event listener for status change
+    setTimeout(() => {
+      const statusSelect = document.getElementById('updateStatus');
+      const customGroup = document.getElementById('customStatusGroup');
+      if (statusSelect && customGroup) {
+        statusSelect.addEventListener('change', () => {
+          customGroup.style.display = statusSelect.value === 'Custom Status' ? 'block' : 'none';
+        });
+      }
+    }, 100);
+    
+    return modal;
+  },
+
+  // Save tracking update
+  saveTrackingUpdate(orderId) {
+    const statusSelect = document.getElementById('updateStatus');
+    const customStatus = document.getElementById('customStatus').value.trim();
+    const location = document.getElementById('updateLocation').value.trim();
+    const description = document.getElementById('updateDescription').value.trim();
+    
+    const status = statusSelect.value === 'Custom Status' ? customStatus : statusSelect.value;
+    
+    if (!status || !location || !description) {
+      DB.showToast('Error', 'All fields are required', 'error');
+      return;
+    }
+    
+    let orders = DB.getOrders();
+    const order = orders.find(o => o.id === orderId);
+    if (order) {
+      // Initialize tracking history if it doesn't exist
+      if (!order.trackingHistory) {
+        order.trackingHistory = [];
+      }
+      
+      // Add new tracking event
+      order.trackingHistory.push({
+        timestamp: new Date().toISOString(),
+        status: status,
+        location: location,
+        description: description
+      });
+      
+      // Update order status if delivered
+      if (status.toLowerCase().includes('delivered')) {
+        order.status = 'delivered';
+      } else if (status.toLowerCase().includes('shipped') && order.status !== 'delivered') {
+        order.status = 'shipped';
+      }
+      
+      DB.setOrders(orders);
+      document.getElementById('trackingUpdateModal').remove();
+      this.renderOrders();
+      DB.showToast('Update Added', `Tracking update added for ${orderId}`, 'success');
     }
   },
 

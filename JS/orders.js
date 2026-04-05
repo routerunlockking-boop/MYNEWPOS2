@@ -4,6 +4,147 @@
  */
 
 const Orders = {
+  // Show tracking timeline modal
+  showTrackingTimeline(orderId) {
+    const orders = DB.getOrders();
+    const order = orders.find(o => o.id === orderId);
+    if (!order || !order.trackingHistory) return;
+    
+    const modal = this.createTrackingTimelineModal(order);
+    document.body.appendChild(modal);
+    modal.classList.add('active');
+  },
+
+  // Create tracking timeline modal
+  createTrackingTimelineModal(order) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'trackingTimelineModal';
+    modal.innerHTML = `
+      <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header">
+          <h3><i class="fas fa-history"></i> Tracking Timeline - Order ${order.id}</h3>
+          <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div style="background:var(--primary-light);padding:16px;border-radius:8px;margin-bottom:20px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-weight:600;color:var(--primary);">${order.carrier}</span>
+              <span style="font-family:monospace;font-size:0.85rem;color:var(--dark);">${order.trackingNumber}</span>
+            </div>
+            ${order.estimatedDelivery ? `
+              <div style="font-size:0.85rem;color:var(--gray-600);">
+                <i class="fas fa-calendar"></i> Estimated Delivery: ${order.estimatedDelivery}
+              </div>
+            ` : ''}
+          </div>
+          
+          <div class="tracking-timeline">
+            ${order.trackingHistory.map((event, index) => `
+              <div class="timeline-item ${index === order.trackingHistory.length - 1 ? 'timeline-item-active' : ''}">
+                <div class="timeline-marker">
+                  <div class="timeline-dot"></div>
+                  ${index < order.trackingHistory.length - 1 ? '<div class="timeline-line"></div>' : ''}
+                </div>
+                <div class="timeline-content">
+                  <div class="timeline-header">
+                    <div class="timeline-status">${event.status}</div>
+                    <div class="timeline-time">${this.formatDateTime(event.timestamp)}</div>
+                  </div>
+                  <div class="timeline-location">
+                    <i class="fas fa-map-marker-alt"></i> ${event.location}
+                  </div>
+                  <div class="timeline-description">${event.description}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          
+          ${order.trackingUrl ? `
+            <div style="margin-top:20px;text-align:center;">
+              <button class="btn btn-primary" onclick="window.open('${order.trackingUrl}', '_blank')">
+                <i class="fas fa-external-link-alt"></i> Track on Carrier Website
+              </button>
+            </div>
+          ` : ''}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="this.closest('.modal').remove()">Close</button>
+          <button type="button" class="btn btn-primary" onclick="Orders.downloadTrackingInfo('${order.id}')">
+            <i class="fas fa-download"></i> Download Tracking Info
+          </button>
+        </div>
+      </div>
+    `;
+    return modal;
+  },
+
+  // Format date and time for timeline
+  formatDateTime(timestamp) {
+    const date = new Date(timestamp);
+    const options = { 
+      month: 'short', 
+      day: 'numeric', 
+      hour: '2-digit', 
+      minute: '2-digit'
+    };
+    return date.toLocaleDateString('en-US', options);
+  },
+
+  // Download tracking information
+  downloadTrackingInfo(orderId) {
+    const orders = DB.getOrders();
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+    
+    let trackingText = `Tracking Information for Order ${order.id}\n`;
+    trackingText += `=====================================\n\n`;
+    trackingText += `Order Details:\n`;
+    trackingText += `Customer: ${order.customer}\n`;
+    trackingText += `Email: ${order.email}\n`;
+    trackingText += `Phone: ${order.phone}\n`;
+    trackingText += `Address: ${order.address}\n\n`;
+    
+    trackingText += `Shipping Information:\n`;
+    trackingText += `Carrier: ${order.carrier}\n`;
+    trackingText += `Tracking Number: ${order.trackingNumber}\n`;
+    trackingText += `Estimated Delivery: ${order.estimatedDelivery || 'N/A'}\n`;
+    trackingText += `Tracking URL: ${order.trackingUrl || 'N/A'}\n\n`;
+    
+    trackingText += `Tracking History:\n`;
+    trackingText += `-----------------\n`;
+    
+    if (order.trackingHistory && order.trackingHistory.length > 0) {
+      order.trackingHistory.forEach(event => {
+        const date = new Date(event.timestamp);
+        const formattedDate = date.toLocaleString();
+        trackingText += `\n${formattedDate}\n`;
+        trackingText += `Status: ${event.status}\n`;
+        trackingText += `Location: ${event.location}\n`;
+        trackingText += `Description: ${event.description}\n`;
+        trackingText += `-----------------\n`;
+      });
+    } else {
+      trackingText += 'No tracking history available.\n';
+    }
+    
+    trackingText += `\nGenerated on: ${new Date().toLocaleString()}\n`;
+    trackingText += `Smart Zone LK - Order Tracking System`;
+    
+    // Create and download file
+    const blob = new Blob([trackingText], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tracking_${order.id}_${order.trackingNumber}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    DB.showToast('Download Complete', `Tracking info downloaded for ${order.id}`, 'success');
+  },
+
   renderCustomerOrders() {
     const userStr = localStorage.getItem('sz_user');
     const container = document.getElementById('customerOrdersContainer');
@@ -115,9 +256,14 @@ const Orders = {
                     
                     ${order.trackingNumber && (order.status === 'shipped' || order.status === 'delivered') ? `
                         <div style="margin-top:20px;padding:16px;background:var(--primary-light);border-radius:12px;border:1px solid var(--primary);">
-                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
                                 <i class="fas fa-truck" style="color:var(--primary);"></i>
                                 <span style="font-weight:700;color:var(--primary);">Tracking Information</span>
+                                ${order.trackingHistory && order.trackingHistory.length > 0 ? `
+                                    <span style="margin-left:auto;font-size:0.75rem;color:var(--success);font-weight:600;">
+                                        <i class="fas fa-circle"></i> ${order.trackingHistory.length} Updates
+                                    </span>
+                                ` : ''}
                             </div>
                             <div style="display:grid;gap:8px;font-size:0.9rem;">
                                 <div style="display:flex;justify-content:space-between;">
@@ -134,12 +280,26 @@ const Orders = {
                                         <span style="font-weight:600;color:var(--dark);">${order.estimatedDelivery}</span>
                                     </div>
                                 ` : ''}
+                                ${order.trackingHistory && order.trackingHistory.length > 0 ? `
+                                    <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--gray-200);">
+                                        <div style="color:var(--gray-600);font-size:0.8rem;margin-bottom:4px;">Latest Update</div>
+                                        <div style="font-weight:600;color:var(--primary);">${order.trackingHistory[order.trackingHistory.length - 1].status}</div>
+                                        <div style="font-size:0.8rem;color:var(--gray-600);margin-top:2px;">
+                                            <i class="fas fa-map-marker-alt"></i> ${order.trackingHistory[order.trackingHistory.length - 1].location} • ${this.formatDateTime(order.trackingHistory[order.trackingHistory.length - 1].timestamp)}
+                                        </div>
+                                    </div>
+                                ` : ''}
                             </div>
-                            ${order.trackingUrl ? `
-                                <button class="btn btn-primary btn-sm" style="margin-top:12px;width:100%;" onclick="window.open('${order.trackingUrl}', '_blank')">
-                                    <i class="fas fa-external-link-alt"></i> Track Package
+                            <div style="display:flex;gap:8px;margin-top:12px;">
+                                ${order.trackingUrl ? `
+                                    <button class="btn btn-primary btn-sm" style="flex:1;" onclick="window.open('${order.trackingUrl}', '_blank')">
+                                        <i class="fas fa-external-link-alt"></i> Track on Carrier Site
+                                    </button>
+                                ` : ''}
+                                <button class="btn btn-outline btn-sm" style="flex:1;" onclick="Orders.showTrackingTimeline('${order.id}')">
+                                    <i class="fas fa-history"></i> View Full Timeline
                                 </button>
-                            ` : ''}
+                            </div>
                         </div>
                     ` : ''}
                     
