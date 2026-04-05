@@ -598,30 +598,75 @@ const Admin = {
     DB.showToast('Product Duplicated', `Duplicate created: ${newProduct.name}`, 'success');
   },
 
+  // Preview product image
+  previewProductImage() {
+    const imageUrl = document.getElementById('prodImageUrl').value.trim();
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    
+    if (imageUrl) {
+      previewContainer.innerHTML = `<img src="${imageUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;" onerror="this.onerror=null;this.parentElement.innerHTML='<i class=\\'fas fa-exclamation-triangle\\' style=\\'font-size:2rem;color:var(--warning);\\'></i>';">`;
+    } else {
+      previewContainer.innerHTML = '<i class="fas fa-image" style="font-size:2rem;color:var(--gray-400);"></i>';
+    }
+  },
+
   // Edit product (full edit)
   editProduct(id) {
     const products = DB.getProducts();
     const product = products.find(p => p.id === id);
     if (!product) return;
     
-    document.getElementById('prodName').value = product.name;
+    // Basic Information
+    document.getElementById('prodName').value = product.name || '';
+    document.getElementById('prodBrand').value = product.brand || '';
+    document.getElementById('prodCategory').value = product.category || '';
+    
+    // Image
     const imgEl = document.getElementById('prodImageUrl');
     if (imgEl) imgEl.value = product.imgUrl || '';
-    document.getElementById('prodBrand').value = product.brand;
-    document.getElementById('prodCategory').value = product.category;
+    this.previewProductImage();
+    
+    // Technical Specifications
     document.getElementById('prodWifi').value = product.wifi || '';
-    document.getElementById('prodPrice').value = product.price;
-    document.getElementById('prodSalePrice').value = product.salePrice || '';
-    document.getElementById('prodStock').value = product.stock;
     document.getElementById('prodSpeed').value = product.speed || '';
     document.getElementById('prodCoverage').value = product.coverage || '';
-    document.getElementById('prodDesc').value = product.description || '';
+    document.getElementById('prodCapacity').value = product.capacity || '';
+    document.getElementById('prodBands').value = product.bands || '';
     
+    // Pricing and Inventory
+    document.getElementById('prodPrice').value = product.price || '';
+    document.getElementById('prodSalePrice').value = product.salePrice || '';
+    document.getElementById('prodStock').value = product.stock || '';
+    document.getElementById('prodSku').value = product.sku || '';
+    document.getElementById('prodWarranty').value = product.warranty || '';
+    
+    // Product Details
+    document.getElementById('prodDesc').value = product.description || '';
+    document.getElementById('prodFullDesc').value = product.fullDescription || '';
+    document.getElementById('prodFeatures').value = product.features ? product.features.join('\n') : '';
+    
+    // Advanced Specifications
     let specsText = '';
     if (product.specs) {
       specsText = Object.entries(product.specs).map(([k,v]) => `${k}: ${v}`).join('\n');
     }
     document.getElementById('prodSpecs').value = specsText;
+    document.getElementById('prodPackage').value = product.packageContents || '';
+    document.getElementById('prodDimensions').value = product.dimensions || '';
+    document.getElementById('prodWeight').value = product.weight || '';
+    
+    // Product Status
+    document.getElementById('prodStatus').value = product.status || 'active';
+    
+    // Badges
+    document.getElementById('badgeNew').checked = product.isNew || false;
+    document.getElementById('badgeSale').checked = product.badge === 'sale' || false;
+    document.getElementById('badgeHot').checked = product.isHot || false;
+    document.getElementById('badgeFeatured').checked = product.isFeatured || false;
+    
+    // Rating and Reviews
+    document.getElementById('prodRating').value = product.rating || 4.5;
+    document.getElementById('prodReviews').value = product.reviews || 0;
     
     document.getElementById('productFormTitle').textContent = 'Edit Product';
     this.editingProductId = id;
@@ -971,22 +1016,59 @@ const Admin = {
   },
 
   saveProduct() {
+    // Basic Information
     const imgEl = document.getElementById('prodImageUrl');
     const imgUrl = imgEl ? imgEl.value.trim() : '';
     const name = document.getElementById('prodName').value.trim();
     const brand = document.getElementById('prodBrand').value;
     const category = document.getElementById('prodCategory').value;
+    
+    // Technical Specifications
     const wifi = document.getElementById('prodWifi').value;
+    const speed = document.getElementById('prodSpeed').value.trim();
+    const coverage = document.getElementById('prodCoverage').value.trim();
+    const capacity = document.getElementById('prodCapacity').value.trim();
+    const bands = document.getElementById('prodBands').value.trim();
+    
+    // Pricing and Inventory
     const price = parseInt(document.getElementById('prodPrice').value);
     const salePrice = parseInt(document.getElementById('prodSalePrice').value) || null;
     const stock = parseInt(document.getElementById('prodStock').value);
-    const speed = document.getElementById('prodSpeed').value.trim();
-    const coverage = document.getElementById('prodCoverage').value.trim();
-    const desc = document.getElementById('prodDesc').value.trim();
-    const specsText = document.getElementById('prodSpecs').value.trim();
+    const sku = document.getElementById('prodSku').value.trim();
+    const warranty = document.getElementById('prodWarranty').value.trim();
     
-    if (!name || !brand || !category || !price || isNaN(stock)) {
-      DB.showToast('Error', 'Please fill in all required fields.', 'error');
+    // Product Details
+    const desc = document.getElementById('prodDesc').value.trim();
+    const fullDesc = document.getElementById('prodFullDesc').value.trim();
+    const featuresText = document.getElementById('prodFeatures').value.trim();
+    
+    // Advanced Specifications
+    const specsText = document.getElementById('prodSpecs').value.trim();
+    const packageContents = document.getElementById('prodPackage').value.trim();
+    const dimensions = document.getElementById('prodDimensions').value.trim();
+    const weight = document.getElementById('prodWeight').value.trim();
+    
+    // Product Status
+    const status = document.getElementById('prodStatus').value;
+    
+    // Badges
+    const isNew = document.getElementById('badgeNew').checked;
+    const isSale = document.getElementById('badgeSale').checked;
+    const isHot = document.getElementById('badgeHot').checked;
+    const isFeatured = document.getElementById('badgeFeatured').checked;
+    
+    // Rating and Reviews
+    const rating = parseFloat(document.getElementById('prodRating').value) || 4.5;
+    const reviews = parseInt(document.getElementById('prodReviews').value) || 0;
+    
+    // Validation
+    if (!name || !brand || !category || !price || isNaN(stock) || stock < 0) {
+      DB.showToast('Error', 'Please fill in all required fields with valid values.', 'error');
+      return;
+    }
+    
+    if (price <= 0) {
+      DB.showToast('Error', 'Price must be greater than 0.', 'error');
       return;
     }
     
@@ -999,23 +1081,49 @@ const Admin = {
       });
     }
     
+    // Parse features
+    const features = featuresText ? featuresText.split('\n').filter(f => f.trim()) : [];
+    
     const products = DB.getProducts();
     
     if (this.editingProductId) {
       // Edit existing
       const idx = products.findIndex(p => p.id === this.editingProductId);
       if (idx >= 0) {
-        products[idx] = { ...products[idx], imgUrl, name, brand, category, wifi, price, salePrice, stock, speed, coverage, description: desc, specs };
+        products[idx] = {
+          ...products[idx],
+          imgUrl, name, brand, category,
+          wifi, speed, coverage, capacity, bands,
+          price, salePrice, stock, sku, warranty,
+          description: desc, fullDescription: fullDesc, features,
+          specs, packageContents, dimensions, weight,
+          status, isNew, isHot, isFeatured,
+          rating, reviews
+        };
+        
+        // Update badge based on checkboxes
+        if (isSale) {
+          products[idx].badge = 'sale';
+        } else if (isNew) {
+          products[idx].badge = 'new';
+        } else {
+          products[idx].badge = '';
+        }
       }
-      DB.showToast('Product Updated', `${name} has been updated.`, 'success');
+      DB.showToast('Product Updated', `${name} has been updated successfully.`, 'success');
     } else {
       // Add new
       const newProduct = {
         id: products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1,
-        imgUrl, name, brand, category, wifi, speed, coverage, price, salePrice, stock,
-        rating: 4.5, reviews: 0,
-        badge: salePrice ? 'sale' : '', isNew: !salePrice, isHot: false,
-        description: desc, specs
+        imgUrl, name, brand, category,
+        wifi, speed, coverage, capacity, bands,
+        price, salePrice, stock, sku, warranty,
+        description: desc, fullDescription: fullDesc, features,
+        specs, packageContents, dimensions, weight,
+        status: status || 'active',
+        isNew, isHot, isFeatured,
+        rating, reviews,
+        badge: isSale ? 'sale' : (isNew ? 'new' : '')
       };
       products.push(newProduct);
       DB.showToast('Product Added', `${name} has been added to the store.`, 'success');
@@ -1035,10 +1143,31 @@ const Admin = {
   },
 
   clearProductForm() {
-    ['prodImageUrl','prodName','prodBrand','prodCategory','prodWifi','prodPrice','prodSalePrice','prodStock','prodSpeed','prodCoverage','prodDesc','prodSpecs'].forEach(id => {
+    // Clear all form fields
+    const fields = [
+      'prodImageUrl','prodName','prodBrand','prodCategory','prodWifi','prodSpeed','prodCoverage','prodCapacity','prodBands',
+      'prodPrice','prodSalePrice','prodStock','prodSku','prodWarranty','prodDesc','prodFullDesc','prodFeatures',
+      'prodSpecs','prodPackage','prodDimensions','prodWeight','prodStatus','prodRating','prodReviews'
+    ];
+    
+    fields.forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
+    
+    // Reset checkboxes
+    ['badgeNew','badgeSale','badgeHot','badgeFeatured'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.checked = false;
+    });
+    
+    // Reset image preview
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    if (previewContainer) {
+      previewContainer.innerHTML = '<i class="fas fa-image" style="font-size:2rem;color:var(--gray-400);"></i>';
+    }
+    
+    // Reset form title and editing state
     document.getElementById('productFormTitle').textContent = 'Add New Product';
     this.editingProductId = null;
   },

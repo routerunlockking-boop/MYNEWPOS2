@@ -525,19 +525,87 @@
                     <div class="admin-header"><h1 id="productFormTitle">Add New Product</h1><button class="btn btn-ghost" data-admin="products"><i class="fas fa-arrow-left"></i> Back to Products</button></div>
                     <div class="admin-card">
                         <div class="admin-form-grid">
-                            <div class="full"><label>Image URL (Optional)</label><input type="text" id="prodImageUrl" placeholder="https://example.com/image.jpg"></div>
-                            <div><label>Product Name *</label><input type="text" id="prodName" placeholder="e.g. TP-Link Archer AX73"></div>
-                            <div><label>Brand *</label><select id="prodBrand"><option value="">Select Brand</option><option>TP-Link</option><option>ASUS</option><option>Huawei</option><option>Xiaomi</option><option>Netgear</option><option>Mercusys</option><option>Tenda</option><option>D-Link</option><option>Other</option></select></div>
-                            <div><label>Category *</label><select id="prodCategory"><option value="">Select Category</option><option>Home Routers</option><option>Gaming Routers</option><option>Mesh Systems</option><option>Enterprise</option><option>Accessories</option></select></div>
-                            <div><label>WiFi Standard</label><select id="prodWifi"><option value="">Select</option><option>WiFi 7</option><option>WiFi 6E</option><option>WiFi 6</option><option>WiFi 5 (AC)</option><option>WiFi 4 (N)</option></select></div>
-                            <div><label>Regular Price (LKR) *</label><input type="number" id="prodPrice" placeholder="e.g. 24990"></div>
-                            <div><label>Discounted Price (LKR)</label><input type="number" id="prodSalePrice" placeholder="e.g. 19990"></div>
-                            <div><label>Stock Quantity *</label><input type="number" id="prodStock" placeholder="e.g. 50"></div>
-                            <div><label>WiFi Speed</label><input type="text" id="prodSpeed" placeholder="e.g. AX5400 (5400 Mbps)"></div>
-                            <div class="full"><label>Coverage Area</label><input type="text" id="prodCoverage" placeholder="e.g. Up to 2500 sq ft"></div>
-                            <div class="full"><label>Short Description</label><textarea id="prodDesc" rows="3" placeholder="Brief product description..."></textarea></div>
-                            <div class="full"><label>Full Specifications (one per line, format: Key: Value)</label><textarea id="prodSpecs" rows="5" placeholder="Ports: 1x WAN, 4x LAN Gigabit&#10;Antennas: 6x External&#10;MU-MIMO: Yes&#10;OFDMA: Yes"></textarea></div>
-                            <div class="full" style="display:flex;gap:12px;"><button class="btn btn-primary" id="saveProductBtn"><i class="fas fa-save"></i> Save Product</button><button class="btn btn-ghost" id="clearFormBtn">Clear Form</button></div>
+                            <!-- Product Image Section -->
+                            <div class="full">
+                                <label>Product Image</label>
+                                <div style="display:flex;gap:16px;align-items:flex-start;">
+                                    <div style="flex:1;">
+                                        <input type="text" id="prodImageUrl" placeholder="https://example.com/image.jpg" onchange="Admin.previewProductImage()">
+                                        <small style="color:var(--gray-500);display:block;margin-top:4px;">Enter image URL or leave blank for default</small>
+                                    </div>
+                                    <div style="width:120px;height:120px;border:2px dashed var(--gray-300);border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--gray-50);" id="imagePreviewContainer">
+                                        <i class="fas fa-image" style="font-size:2rem;color:var(--gray-400);"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Basic Information -->
+                            <div class="form-section">
+                                <h3 style="margin:20px 0 16px 0;color:var(--primary);border-bottom:2px solid var(--primary-light);padding-bottom:8px;">Basic Information</h3>
+                                <div><label>Product Name *</label><input type="text" id="prodName" placeholder="e.g. TP-Link Archer AX73" required></div>
+                                <div><label>Brand *</label><select id="prodBrand" required><option value="">Select Brand</option><option>TP-Link</option><option>ASUS</option><option>Huawei</option><option>Xiaomi</option><option>Netgear</option><option>Mercusys</option><option>Tenda</option><option>D-Link</option><option>Other</option></select></div>
+                                <div><label>Category *</label><select id="prodCategory" required><option value="">Select Category</option><option>Home Routers</option><option>Gaming Routers</option><option>Mesh Systems</option><option>Enterprise</option><option>Accessories</option></select></div>
+                            </div>
+                            
+                            <!-- Technical Specifications -->
+                            <div class="form-section">
+                                <h3 style="margin:20px 0 16px 0;color:var(--primary);border-bottom:2px solid var(--primary-light);padding-bottom:8px;">Technical Specifications</h3>
+                                <div><label>WiFi Standard</label><select id="prodWifi"><option value="">Select</option><option>WiFi 7</option><option>WiFi 6E</option><option>WiFi 6</option><option>WiFi 5 (AC)</option><option>WiFi 4 (N)</option></select></div>
+                                <div><label>WiFi Speed</label><input type="text" id="prodSpeed" placeholder="e.g. AX5400 (5400 Mbps)"></div>
+                                <div><label>Coverage Area</label><input type="text" id="prodCoverage" placeholder="e.g. Up to 2500 sq ft"></div>
+                                <div><label>Device Capacity</label><input type="text" id="prodCapacity" placeholder="e.g. Up to 200 devices"></div>
+                                <div><label>Frequency Bands</label><input type="text" id="prodBands" placeholder="e.g. 2.4GHz, 5GHz, 6GHz"></div>
+                            </div>
+                            
+                            <!-- Pricing and Inventory -->
+                            <div class="form-section">
+                                <h3 style="margin:20px 0 16px 0;color:var(--primary);border-bottom:2px solid var(--primary-light);padding-bottom:8px;">Pricing & Inventory</h3>
+                                <div><label>Regular Price (LKR) *</label><input type="number" id="prodPrice" placeholder="e.g. 24990" min="0" required></div>
+                                <div><label>Discounted Price (LKR)</label><input type="number" id="prodSalePrice" placeholder="e.g. 19990" min="0"></div>
+                                <div><label>Stock Quantity *</label><input type="number" id="prodStock" placeholder="e.g. 50" min="0" required></div>
+                                <div><label>SKU/Model Number</label><input type="text" id="prodSku" placeholder="e.g. AX73-US"></div>
+                                <div><label>Warranty Period</label><input type="text" id="prodWarranty" placeholder="e.g. 2 Years"></div>
+                            </div>
+                            
+                            <!-- Product Details -->
+                            <div class="form-section">
+                                <h3 style="margin:20px 0 16px 0;color:var(--primary);border-bottom:2px solid var(--primary-light);padding-bottom:8px;">Product Details</h3>
+                                <div class="full"><label>Short Description</label><textarea id="prodDesc" rows="3" placeholder="Brief product description for product cards..." required></textarea></div>
+                                <div class="full"><label>Full Description</label><textarea id="prodFullDesc" rows="5" placeholder="Detailed product description with features and benefits..."></textarea></div>
+                                <div class="full"><label>Key Features (one per line)</label><textarea id="prodFeatures" rows="4" placeholder="• WiFi 6 technology for faster speeds&#10;• Coverage up to 2500 sq ft&#10;• Easy setup with mobile app&#10;• Advanced security features"></textarea></div>
+                            </div>
+                            
+                            <!-- Advanced Specifications -->
+                            <div class="form-section">
+                                <h3 style="margin:20px 0 16px 0;color:var(--primary);border-bottom:2px solid var(--primary-light);padding-bottom:8px;">Advanced Specifications</h3>
+                                <div class="full"><label>Technical Specifications (one per line, format: Key: Value)</label><textarea id="prodSpecs" rows="6" placeholder="WiFi Standard: WiFi 6 (802.11ax)&#10;Speed: AX5400 (4804 + 574 Mbps)&#10;Coverage: Up to 2500 sq ft&#10;Devices: Up to 200 devices&#10;Ports: 1x Gigabit WAN, 4x Gigabit LAN, 1x USB 3.0&#10;Antennas: 6x External High-Gain&#10;Processor: 1.5 GHz Tri-Core&#10;Security: WPA3, HomeShield&#10;MU-MIMO: Yes (4x4)&#10;OFDMA: Yes"></textarea></div>
+                                <div><label>Package Contents</label><textarea id="prodPackage" rows="3" placeholder="Router, Power Adapter, Ethernet Cable, Quick Start Guide"></textarea></div>
+                                <div><label>Dimensions</label><input type="text" id="prodDimensions" placeholder="e.g. 270 x 145 x 55 mm"></div>
+                                <div><label>Weight</label><input type="text" id="prodWeight" placeholder="e.g. 450g"></div>
+                            </div>
+                            
+                            <!-- Product Status -->
+                            <div class="form-section">
+                                <h3 style="margin:20px 0 16px 0;color:var(--primary);border-bottom:2px solid var(--primary-light);padding-bottom:8px;">Product Status</h3>
+                                <div><label>Product Status</label><select id="prodStatus"><option value="active">Active</option><option value="inactive">Inactive</option><option value="discontinued">Discontinued</option></select></div>
+                                <div class="full">
+                                    <label>Product Badges</label>
+                                    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                                        <label style="display:flex;align-items:center;gap:4px;"><input type="checkbox" id="badgeNew" value="new"> New Product</label>
+                                        <label style="display:flex;align-items:center;gap:4px;"><input type="checkbox" id="badgeSale" value="sale"> On Sale</label>
+                                        <label style="display:flex;align-items:center;gap:4px;"><input type="checkbox" id="badgeHot" value="hot"> Hot Seller</label>
+                                        <label style="display:flex;align-items:center;gap:4px;"><input type="checkbox" id="badgeFeatured" value="featured"> Featured</label>
+                                    </div>
+                                </div>
+                                <div><label>Rating (1-5)</label><input type="number" id="prodRating" min="1" max="5" step="0.1" placeholder="e.g. 4.5"></div>
+                                <div><label>Number of Reviews</label><input type="number" id="prodReviews" min="0" placeholder="e.g. 234"></div>
+                            </div>
+                            
+                            <div class="full" style="display:flex;gap:12px;margin-top:20px;">
+                                <button class="btn btn-primary" id="saveProductBtn"><i class="fas fa-save"></i> Save Product</button>
+                                <button class="btn btn-ghost" id="clearFormBtn"><i class="fas fa-times"></i> Clear Form</button>
+                                <button class="btn btn-outline" id="previewProductBtn" onclick="Admin.previewProduct()"><i class="fas fa-eye"></i> Preview</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -545,7 +613,7 @@
                 <div class="admin-section" id="admin-orders" style="display:none;">
                     <div class="admin-header"><h1>Orders</h1></div>
                     <div class="admin-card"><table class="admin-table"><thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody id="adminOrdersBody"></tbody></table></div>
-                </div>
+                </div> <!-- Added closing tag here -->
                 <!-- Customers -->
                 <div class="admin-section" id="admin-customers" style="display:none;">
                     <div class="admin-header">
