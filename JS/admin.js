@@ -124,6 +124,11 @@ const Admin = {
   // Render products table with enhanced editing
   renderProducts() {
     const products = DB.getProducts();
+    
+    // Debug: Log the products being loaded for display
+    console.log('Products loaded for display:', products);
+    console.log('Products count:', products.length);
+    
     const body = document.getElementById('adminProductsBody');
     const headerRow = document.querySelector('#admin-products table thead tr');
     
@@ -1131,6 +1136,11 @@ const Admin = {
     }
     
     DB.setProducts(products);
+    
+    // Debug: Log the products to verify they're being saved
+    console.log('Products after save:', products);
+    console.log('Total products count:', products.length);
+    
     this.clearProductForm();
     this.showSection('products');
   },
