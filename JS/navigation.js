@@ -62,7 +62,6 @@ const Navigation = {
         break;
       case 'admin':
         Admin.renderDashboard();
-        Admin.showSection('dashboard');
         break;
     }
   },
@@ -87,6 +86,15 @@ const Navigation = {
         const category = link.getAttribute('data-filter');
         this.filterByCategory(category);
         document.getElementById('mobileNav').classList.remove('active');
+      });
+    });
+
+    // Admin nav
+    document.querySelectorAll('[data-admin]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const section = link.getAttribute('data-admin');
+        Admin.showSection(section);
       });
     });
   },

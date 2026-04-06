@@ -105,109 +105,11 @@ const DB = {
   ],
 
   DEFAULT_ORDERS: [
-    { 
-      id: 'SZ-001', 
-      customer: 'Kamal Perera', 
-      email: 'kamal@email.com', 
-      phone: '+94 77 123 4567', 
-      items: [{productId:1,qty:1,price:19990}], 
-      total: 20340, 
-      payment: 'cod', 
-      status: 'delivered', 
-      district: 'Colombo', 
-      city: 'Colombo', 
-      date: '2025-01-10', 
-      address: 'No. 45, Galle Road, Colombo 03', 
-      trackingNumber: 'SLP001234567', 
-      carrier: 'Sri Lanka Post', 
-      trackingUrl: 'https://www.srilankapost.gov.lk/track', 
-      estimatedDelivery: '2025-01-12',
-      trackingHistory: [
-        { 
-          timestamp: '2025-01-10T14:30:00', 
-          status: 'Order Confirmed', 
-          location: 'Colombo Sorting Center', 
-          description: 'Order received and processed'
-        },
-        { 
-          timestamp: '2025-01-11T09:15:00', 
-          status: 'Package Dispatched', 
-          location: 'Colombo Main Office', 
-          description: 'Package handed over to Sri Lanka Post'
-        },
-        { 
-          timestamp: '2025-01-11T16:45:00', 
-          status: 'In Transit', 
-          location: 'Gampaha Distribution Hub', 
-          description: 'Package in transit to destination'
-        },
-        { 
-          timestamp: '2025-01-12T08:30:00', 
-          status: 'Out for Delivery', 
-          location: 'Colombo 03 Post Office', 
-          description: 'Package out for delivery'
-        },
-        { 
-          timestamp: '2025-01-12T14:20:00', 
-          status: 'Delivered', 
-          location: 'Customer Address', 
-          description: 'Package successfully delivered to recipient'
-        }
-      ]
-    },
-    { 
-      id: 'SZ-002', 
-      customer: 'Nimali Silva', 
-      email: 'nimali@email.com', 
-      phone: '+94 71 234 5678', 
-      items: [{productId:4,qty:2,price:9490}], 
-      total: 19330, 
-      payment: 'bank', 
-      status: 'shipped', 
-      district: 'Kandy', 
-      city: 'Kandy', 
-      date: '2025-01-12', 
-      address: 'No. 12, Temple Road, Kandy', 
-      trackingNumber: 'DHL789012345', 
-      carrier: 'DHL Express', 
-      trackingUrl: 'https://www.dhl.com/en/express/tracking.html', 
-      estimatedDelivery: '2025-01-18',
-      trackingHistory: [
-        { 
-          timestamp: '2025-01-12T11:00:00', 
-          status: 'Order Confirmed', 
-          location: 'Smart Zone Warehouse', 
-          description: 'Order confirmed and payment verified'
-        },
-        { 
-          timestamp: '2025-01-13T10:30:00', 
-          status: 'Package Picked Up', 
-          location: 'DHL Express Colombo', 
-          description: 'Package picked up by DHL courier'
-        },
-        { 
-          timestamp: '2025-01-13T15:45:00', 
-          status: 'In Transit', 
-          location: 'DHL Hub Colombo', 
-          description: 'Package processed at DHL facility'
-        },
-        { 
-          timestamp: '2025-01-14T08:00:00', 
-          status: 'In Transit', 
-          location: 'DHL Hub Kandy', 
-          description: 'Package arrived at destination hub'
-        },
-        { 
-          timestamp: '2025-01-15T09:30:00', 
-          status: 'Out for Delivery', 
-          location: 'Kandy Distribution Center', 
-          description: 'Package with local courier for delivery'
-        }
-      ]
-    },
-    { id: 'SZ-003', customer: 'Ruvini Fernando', email: 'ruvini@email.com', phone: '+94 76 345 6789', items: [{productId:5,qty:1,price:38990}], total: 38990, payment: 'cod', status: 'processing', district: 'Galle', city: 'Galle', date: '2025-01-14', address: 'No. 78, Lighthouse Street, Galle', trackingNumber: '', carrier: '', trackingUrl: '', estimatedDelivery: '' },
-    { id: 'SZ-004', customer: 'Saman Kumara', email: 'saman@email.com', phone: '+94 70 456 7890', items: [{productId:7,qty:1,price:79990},{productId:12,qty:2,price:1490}], total: 83620, payment: 'online', status: 'confirmed', district: 'Jaffna', city: 'Jaffna', date: '2025-01-15', address: 'No. 23, Main Street, Jaffna', trackingNumber: '', carrier: '', trackingUrl: '', estimatedDelivery: '' },
-    { id: 'SZ-005', customer: 'Dilshan Rajapaksa', email: 'dilshan@email.com', phone: '+94 72 567 8901', items: [{productId:9,qty:1,price:109990}], total: 109990, payment: 'cod', status: 'pending', district: 'Colombo', city: 'Nugegoda', date: '2025-01-16', address: 'No. 56, High Level Road, Nugegoda', trackingNumber: '', carrier: '', trackingUrl: '', estimatedDelivery: '' }
+    { id: 'SZ-001', customer: 'Kamal Perera', email: 'kamal@email.com', phone: '+94 77 123 4567', items: [{productId:1,qty:1,price:19990}], total: 20340, payment: 'cod', status: 'delivered', district: 'Colombo', city: 'Colombo', date: '2025-01-10', address: 'No. 45, Galle Road, Colombo 03' },
+    { id: 'SZ-002', customer: 'Nimali Silva', email: 'nimali@email.com', phone: '+94 71 234 5678', items: [{productId:4,qty:2,price:9490}], total: 19330, payment: 'bank', status: 'shipped', district: 'Kandy', city: 'Kandy', date: '2025-01-12', address: 'No. 12, Temple Road, Kandy' },
+    { id: 'SZ-003', customer: 'Ruvini Fernando', email: 'ruvini@email.com', phone: '+94 76 345 6789', items: [{productId:5,qty:1,price:38990}], total: 38990, payment: 'cod', status: 'processing', district: 'Galle', city: 'Galle', date: '2025-01-14', address: 'No. 78, Lighthouse Street, Galle' },
+    { id: 'SZ-004', customer: 'Saman Kumara', email: 'saman@email.com', phone: '+94 70 456 7890', items: [{productId:7,qty:1,price:79990},{productId:12,qty:2,price:1490}], total: 83620, payment: 'online', status: 'confirmed', district: 'Jaffna', city: 'Jaffna', date: '2025-01-15', address: 'No. 23, Main Street, Jaffna' },
+    { id: 'SZ-005', customer: 'Dilshan Rajapaksa', email: 'dilshan@email.com', phone: '+94 72 567 8901', items: [{productId:9,qty:1,price:109990}], total: 109990, payment: 'cod', status: 'pending', district: 'Colombo', city: 'Nugegoda', date: '2025-01-16', address: 'No. 56, High Level Road, Nugegoda' }
   ],
 
   DEFAULT_CUSTOMERS: [
