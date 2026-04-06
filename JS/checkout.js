@@ -142,7 +142,13 @@ const Checkout = {
     const payment = document.querySelector('input[name="payment"]:checked').value;
     
     const orders = DB.getOrders();
-    const orderId = 'SZ-' + String(orders.length + 6).padStart(3, '0');
+    // Get the next order ID by finding the highest existing order number
+    const existingOrderNumbers = orders.map(o => {
+      const match = o.id.match(/SZ-(\d+)/);
+      return match ? parseInt(match[1]) : 0;
+    });
+    const nextOrderNumber = Math.max(...existingOrderNumbers, 5) + 1;
+    const orderId = 'SZ-' + String(nextOrderNumber).padStart(3, '0');
     
     const order = {
       id: orderId,
@@ -161,6 +167,11 @@ const Checkout = {
     
     orders.push(order);
     DB.setOrders(orders);
+    
+    // Debug: Log the order being created
+    console.log('New order created:', order);
+    console.log('Total orders after creation:', orders.length);
+    console.log('All orders in localStorage:', JSON.parse(localStorage.getItem('sz_orders')));
     
     // Update stock
     let productsData = DB.getProducts();

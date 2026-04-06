@@ -691,6 +691,12 @@ const Admin = {
   // Render orders table
   renderOrders() {
     const orders = DB.getOrders();
+    
+    // Debug: Log orders being loaded for admin display
+    console.log('Admin: Orders loaded for display:', orders);
+    console.log('Admin: Total orders count:', orders.length);
+    console.log('Admin: Orders from localStorage:', JSON.parse(localStorage.getItem('sz_orders')));
+    
     const body = document.getElementById('adminOrdersBody');
     if (body) {
       body.innerHTML = orders.map(o => `
