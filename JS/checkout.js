@@ -10,27 +10,6 @@ const Checkout = {
     this.setupContinueShopping();
   },
 
-  // Enforces login before checkout and pre-fills user details
-  proceedToCheckout() {
-    const userStr = localStorage.getItem('sz_user');
-    if (!userStr) {
-      DB.showToast('Login Required', 'Please sign in or create an account to proceed to checkout.', 'error');
-      Auth.openModal('login');
-      return;
-    }
-    
-    const user = JSON.parse(userStr);
-    const checkName = document.getElementById('checkName');
-    const checkEmail = document.getElementById('checkEmail');
-    const checkPhone = document.getElementById('checkPhone');
-    
-    if (checkName) checkName.value = user.name || '';
-    if (checkEmail) checkEmail.value = user.email || '';
-    if (checkPhone) checkPhone.value = user.phone || '';
-    
-    navigateTo('checkout');
-  },
-
   // Render checkout order summary
   renderCheckoutSummary() {
     const cart = DB.getCart();

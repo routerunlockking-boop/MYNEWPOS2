@@ -29,10 +29,6 @@ const Navigation = {
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
     document.querySelectorAll(`.nav-link[data-nav="${page}"]`).forEach(l => l.classList.add('active'));
     
-    // Update bottom nav links
-    document.querySelectorAll('.bottom-nav-item').forEach(l => l.classList.remove('active'));
-    document.querySelectorAll(`.bottom-nav-item[data-nav="${page}"]`).forEach(l => l.classList.add('active'));
-    
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
@@ -56,9 +52,6 @@ const Navigation = {
         break;
       case 'checkout':
         Checkout.renderCheckoutSummary();
-        break;
-      case 'orders':
-        if (typeof Orders !== 'undefined') Orders.renderCustomerOrders();
         break;
       case 'admin':
         Admin.renderDashboard();

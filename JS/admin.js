@@ -40,7 +40,21 @@ const Admin = {
 
   // Admin login
   setupAdminLogin() {
-    // Handled by Auth.js unified portal
+    const btn = document.getElementById('adminLoginBtn');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const email = document.getElementById('adminEmail').value.trim();
+        const password = document.getElementById('adminPassword').value.trim();
+        
+        if (email === 'admin@smartzonelk.com' && password === 'admin123') {
+          this.isLoggedIn = true;
+          Navigation.navigateTo('admin');
+          DB.showToast('Welcome Admin!', 'You are now logged in to the dashboard.', 'success');
+        } else {
+          DB.showToast('Login Failed', 'Invalid email or password. Try admin@smartzonelk.com / admin123', 'error');
+        }
+      });
+    }
   },
 
   // Admin logout
@@ -50,7 +64,7 @@ const Admin = {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         this.isLoggedIn = false;
-        Navigation.navigateTo('login');
+        Navigation.navigateTo('admin-login');
         DB.showToast('Logged Out', 'You have been logged out.', 'info');
       });
     }
@@ -190,69 +204,9 @@ const Admin = {
           <td>${c.orders}</td>
           <td>${DB.formatLKR(c.totalSpent)}</td>
           <td>${c.registered}</td>
-          <td>
-            <button class="action-btn delete" onclick="Admin.deleteCustomer('${c.email}')" title="Delete"><i class="fas fa-trash"></i></button>
-          </td>
         </tr>
       `).join('');
     }
-  },
-
-  showAddCustomerModal() {
-    const modal = document.getElementById('addCustomerModal');
-    if (modal) modal.classList.add('active');
-  },
-
-  hideAddCustomerModal() {
-    const modal = document.getElementById('addCustomerModal');
-    if (modal) {
-      modal.classList.remove('active');
-      document.getElementById('addCustomerForm').reset();
-    }
-  },
-
-  saveNewCustomer(e) {
-    e.preventDefault();
-    const name = document.getElementById('newCustomerName').value.trim();
-    const email = document.getElementById('newCustomerEmail').value.trim();
-    const phone = document.getElementById('newCustomerPhone').value.trim();
-    
-    if (!name || !email || !phone) return;
-    
-    const customers = DB.getCustomers();
-    
-    if (customers.find(c => c.email.toLowerCase() === email.toLowerCase())) {
-        DB.showToast('Error', 'Customer with this email already exists', 'error');
-        return;
-    }
-
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-
-    customers.push({
-        name,
-        email,
-        phone,
-        orders: 0,
-        totalSpent: 0,
-        registered: `${yyyy}-${mm}-${dd}`
-    });
-
-    localStorage.setItem('sz_customers', JSON.stringify(customers));
-    this.hideAddCustomerModal();
-    this.renderCustomers();
-    DB.showToast('Success', 'Customer added successfully', 'success');
-  },
-
-  deleteCustomer(email) {
-    if (!confirm('Are you sure you want to delete this customer?')) return;
-    let customers = DB.getCustomers();
-    customers = customers.filter(c => c.email !== email);
-    localStorage.setItem('sz_customers', JSON.stringify(customers));
-    this.renderCustomers();
-    DB.showToast('Success', 'Customer deleted successfully', 'success');
   },
 
   // Update order status
@@ -288,8 +242,6 @@ const Admin = {
     if (!product) return;
     
     document.getElementById('prodName').value = product.name;
-    const imgEl = document.getElementById('prodImageUrl');
-    if (imgEl) imgEl.value = product.imgUrl || '';
     document.getElementById('prodBrand').value = product.brand;
     document.getElementById('prodCategory').value = product.category;
     document.getElementById('prodWifi').value = product.wifi || '';
@@ -329,8 +281,6 @@ const Admin = {
   },
 
   saveProduct() {
-    const imgEl = document.getElementById('prodImageUrl');
-    const imgUrl = imgEl ? imgEl.value.trim() : '';
     const name = document.getElementById('prodName').value.trim();
     const brand = document.getElementById('prodBrand').value;
     const category = document.getElementById('prodCategory').value;
@@ -363,14 +313,14 @@ const Admin = {
       // Edit existing
       const idx = products.findIndex(p => p.id === this.editingProductId);
       if (idx >= 0) {
-        products[idx] = { ...products[idx], imgUrl, name, brand, category, wifi, price, salePrice, stock, speed, coverage, description: desc, specs };
+        products[idx] = { ...products[idx], name, brand, category, wifi, price, salePrice, stock, speed, coverage, description: desc, specs };
       }
       DB.showToast('Product Updated', `${name} has been updated.`, 'success');
     } else {
       // Add new
       const newProduct = {
         id: products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1,
-        imgUrl, name, brand, category, wifi, speed, coverage, price, salePrice, stock,
+        name, brand, category, wifi, speed, coverage, price, salePrice, stock,
         rating: 4.5, reviews: 0,
         badge: salePrice ? 'sale' : '', isNew: !salePrice, isHot: false,
         description: desc, specs
@@ -393,7 +343,7 @@ const Admin = {
   },
 
   clearProductForm() {
-    ['prodImageUrl','prodName','prodBrand','prodCategory','prodWifi','prodPrice','prodSalePrice','prodStock','prodSpeed','prodCoverage','prodDesc','prodSpecs'].forEach(id => {
+    ['prodName','prodBrand','prodCategory','prodWifi','prodPrice','prodSalePrice','prodStock','prodSpeed','prodCoverage','prodDesc','prodSpecs'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });

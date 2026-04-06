@@ -108,7 +108,7 @@ const Cart = {
             <input type="text" placeholder="Promo code">
             <button onclick="DB.showToast('Promo Code','Invalid promo code','error')">Apply</button>
           </div>
-          <button class="btn btn-primary btn-lg" onclick="Checkout.proceedToCheckout()"><i class="fas fa-lock"></i> Proceed to Checkout</button>
+          <button class="btn btn-primary btn-lg" onclick="navigateTo('checkout')"><i class="fas fa-lock"></i> Proceed to Checkout</button>
           <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:8px;" onclick="navigateTo('shop')"><i class="fas fa-arrow-left"></i> Continue Shopping</button>
         </div>
       </div>
