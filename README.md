@@ -15,7 +15,7 @@ A complete, professional e-commerce website for selling WiFi routers and network
 - **About, Contact, Shipping & Returns, Warranty** pages
 
 ### 🔐 Admin Dashboard
-- **Secure login** (admin@smartzonelk.com / admin123)
+- **Secure login** (smartzonelk101@gmail.com / 200723800285@)
 - **Dashboard** with revenue stats, orders, sales chart, low-stock alerts
 - **Product management** - Add, Edit, Delete with full specifications
 - **Order management** - View all orders, update status (6 statuses)
