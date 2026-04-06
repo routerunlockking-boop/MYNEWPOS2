@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Test - Smart Zone LK</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+        .info { background: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Smart Zone LK - Login Portal Test</h1>
+    
+    <div class="test-section info">
+        <h3>📋 Test Instructions</h3>
+        <p>Use this page to test and debug login functionality. Open browser console (F12) to see debug logs.</p>
+    </div>
+
+    <div class="test-section">
+        <h3>🔑 Admin Login Test</h3>
+        <p><strong>Credentials:</strong> smartzonelk101@gmail.com / 200723800385@</p>
+        <button onclick="testAdminLogin()">Test Admin Login</button>
+        <button onclick="testEmergencyAdmin()">Emergency Admin Access</button>
+        <div id="adminResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>👤 Customer Login Test</h3>
+        <p><strong>Sample Customers:</strong></p>
+        <ul>
+            <li>kamal@email.com (any password)</li>
+            <li>nimali@email.com (any password)</li>
+            <li>ruvini@email.com (any password)</li>
+        </ul>
+        <input type="email" id="testEmail" placeholder="Enter customer email" style="padding: 8px; margin: 5px; width: 200px;">
+        <input type="password" id="testPassword" placeholder="Enter any password" style="padding: 8px; margin: 5px; width: 150px;">
+        <button onclick="testCustomerLogin()">Test Customer Login</button>
+        <div id="customerResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>🔍 Debug Information</h3>
+        <button onclick="showDebugInfo()">Show Debug Info</button>
+        <button onclick="clearStorage()">Clear Storage</button>
+        <pre id="debugInfo">Click "Show Debug Info" to see system status...</pre>
+    </div>
+
+    <div class="test-section info">
+        <h3>🚀 Emergency Access</h3>
+        <p>If normal login fails, open browser console and run:</p>
+        <pre><code>Auth.emergencyAdminLogin()</code></pre>
+        <p>This will grant immediate admin access.</p>
+    </div>
+
+    <script>
+        // Mock the required modules if not available
+        if (typeof DB === 'undefined') {
+            window.DB = {
+                getCustomers: () => [
+                    { name: 'Kamal Perera', email: 'kamal@email.com', phone: '+94 77 123 4567' },
+                    { name: 'Nimali Silva', email: 'nimali@email.com', phone: '+94 71 234 5678' },
+                    { name: 'Ruvini Fernando', email: 'ruvini@email.com', phone: '+94 76 345 6789' }
+                ],
+                showToast: (title, message, type) => {
+                    console.log(`Toast: ${title} - ${message} (${type})`);
+                    alert(`${title}: ${message}`);
+                }
+            };
+        }
+
+        function testAdminLogin() {
+            const result = document.getElementById('adminResult');
+            try {
+                // Simulate admin login
+                const adminUser = { name: 'Admin User', email: 'smartzonelk101@gmail.com', phone: '', role: 'admin' };
+                localStorage.setItem('sz_user', JSON.stringify(adminUser));
+                result.innerHTML = '<div class="success">✅ Admin login successful! User stored in localStorage.</div>';
+                console.log('Admin login test successful:', adminUser);
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ Admin login failed: ${error.message}</div>`;
+                console.error('Admin login test failed:', error);
+            }
+        }
+
+        function testEmergencyAdmin() {
+            const result = document.getElementById('adminResult');
+            try {
+                if (typeof Auth !== 'undefined' && Auth.emergencyAdminLogin) {
+                    Auth.emergencyAdminLogin();
+                    result.innerHTML = '<div class="success">✅ Emergency admin access triggered!</div>';
+                } else {
+                    // Manual emergency access
+                    const adminUser = { name: 'Admin User', email: 'smartzonelk101@gmail.com', phone: '', role: 'admin' };
+                    localStorage.setItem('sz_user', JSON.stringify(adminUser));
+                    result.innerHTML = '<div class="success">✅ Manual emergency admin access completed!</div>';
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ Emergency access failed: ${error.message}</div>`;
+                console.error('Emergency access failed:', error);
+            }
+        }
+
+        function testCustomerLogin() {
+            const result = document.getElementById('customerResult');
+            const email = document.getElementById('testEmail').value;
+            const password = document.getElementById('testPassword').value;
+            
+            if (!email || !password) {
+                result.innerHTML = '<div class="error">❌ Please enter email and password</div>';
+                return;
+            }
+
+            try {
+                const customers = DB.getCustomers();
+                const customer = customers.find(c => c.email === email);
+                
+                if (customer) {
+                    localStorage.setItem('sz_user', JSON.stringify(customer));
+                    result.innerHTML = `<div class="success">✅ Customer login successful for ${customer.name}!</div>`;
+                    console.log('Customer login test successful:', customer);
+                } else {
+                    result.innerHTML = '<div class="error">❌ Customer not found. Try: kamal@email.com, nimali@email.com, or ruvini@email.com</div>';
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ Customer login failed: ${error.message}</div>`;
+                console.error('Customer login test failed:', error);
+            }
+        }
+
+        function showDebugInfo() {
+            const debugEl = document.getElementById('debugInfo');
+            const userStr = localStorage.getItem('sz_user');
+            const user = userStr ? JSON.parse(userStr) : null;
+            
+            const debugInfo = {
+                currentUser: user,
+                isLoggedIn: !!user,
+                userRole: user?.role || 'none',
+                customersAvailable: DB.getCustomers().length,
+                authModuleAvailable: typeof Auth !== 'undefined',
+                navigationModuleAvailable: typeof Navigation !== 'undefined',
+                localStorageContents: {
+                    sz_user: userStr ? 'present' : 'missing',
+                    sz_customers: localStorage.getItem('sz_customers') ? 'present' : 'missing',
+                    sz_orders: localStorage.getItem('sz_orders') ? 'present' : 'missing'
+                }
+            };
+            
+            debugEl.textContent = JSON.stringify(debugInfo, null, 2);
+            console.log('Debug Info:', debugInfo);
+        }
+
+        function clearStorage() {
+            if (confirm('This will clear all local storage data. Continue?')) {
+                localStorage.clear();
+                document.getElementById('debugInfo').textContent = 'Storage cleared.';
+                document.getElementById('adminResult').innerHTML = '';
+                document.getElementById('customerResult').innerHTML = '';
+                console.log('Local storage cleared');
+            }
+        }
+
+        // Auto-show debug info on load
+        window.addEventListener('load', () => {
+            showDebugInfo();
+            console.log('Login test page loaded. Use this page to debug authentication issues.');
+        });
+    </script>
+</body>
+</html>

@@ -10,11 +10,20 @@ const Products = {
     const featured = products.filter(p => p.isHot || p.isNew || p.badge === 'sale').slice(0, 8);
     const container = document.getElementById('featuredProducts');
     if (container) container.innerHTML = featured.map(p => this.createProductCard(p)).join('');
+    
+    // Debug: Log featured products being displayed
+    console.log('Featured products to display:', featured);
+    console.log('Featured products count:', featured.length);
   },
 
   // Render products in shop page
   renderShopProducts(filteredProducts = null) {
     const products = filteredProducts || DB.getProducts();
+    
+    // Debug: Log products being displayed
+    console.log('Shop products to display:', products);
+    console.log('Shop products count:', products.length);
+    
     const container = document.getElementById('shopProducts');
     
     if (container) {
