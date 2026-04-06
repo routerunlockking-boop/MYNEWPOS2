@@ -7,12 +7,12 @@ const DB = {
   // Default product catalog
   DEFAULT_PRODUCTS: [
     {
-      id: 1, name: "TP-Link Archer AX73", brand: "TP-Link", category: "Home Routers",
-      wifi: "WiFi 6", speed: "AX5400", coverage: "Up to 2500 sq ft",
-      price: 24990, salePrice: 19990, stock: 45, rating: 4.8, reviews: 234,
+      id: 1, name: "SLT-MOBITEL S10 ROUTER", brand: "SLT", category: "Home Routers",
+      wifi: "WiFi 4", speed: "150mbps", coverage: "Up to 100m",
+      price: 12500, salePrice: 8990, stock: 45, rating: 4.8, reviews: 234,
       badge: "sale", isNew: false, isHot: true,
-      description: "The TP-Link Archer AX73 is a powerful WiFi 6 router designed for modern homes. With AX5400 dual-band speeds, it delivers ultra-fast connections for streaming, gaming, and working from home. Features OFDMA and MU-MIMO technology for efficient data transmission to multiple devices simultaneously.",
-      specs: { "WiFi Standard": "WiFi 6 (802.11ax)", "Speed": "AX5400 (4804 + 574 Mbps)", "Coverage": "Up to 2500 sq ft", "Devices": "Up to 200 devices", "Ports": "1x Gigabit WAN, 4x Gigabit LAN, 1x USB 3.0", "Antennas": "6x External High-Gain", "Processor": "1.5 GHz Tri-Core", "Security": "WPA3, HomeShield", "MU-MIMO": "Yes (4x4)", "OFDMA": "Yes" }
+      description: "SLT-MOBITEL S10 ROUTER is a powerful WiFi 4 router designed for modern homes. With AX5400 dual-band speeds, it delivers ultra-fast connections for streaming, gaming, and working from home. Features OFDMA and MU-MIMO technology for efficient data transmission to multiple devices simultaneously.",
+      specs: { "WiFi Standard": "WiFi 4 (802.11ax)", "Speed": "AX5400 (4804 + 574 Mbps)", "Coverage": "Up to 2500 sq ft", "Devices": "Up to 200 devices", "Ports": "1x Gigabit WAN, 4x Gigabit LAN, 1x USB 3.0", "Antennas": "6x External High-Gain", "Processor": "1.5 GHz Tri-Core", "Security": "WPA3, HomeShield", "MU-MIMO": "Yes (4x4)", "OFDMA": "Yes" }
     },
     {
       id: 2, name: "ASUS RT-AX86U Pro", brand: "ASUS", category: "Gaming Routers",
